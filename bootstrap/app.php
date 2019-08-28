@@ -20,10 +20,18 @@ require_once __DIR__.'/../vendor/autoload.php';
 $app = new Laravel\Lumen\Application(
     dirname(__DIR__)
 );
+ $app->withFacades();
+ $app->withFacades(true,
+     [
+         Zizaco\Entrust\EntrustFacade::class => 'Entrust',
+     ]);
 
-// $app->withFacades();
+ $app->withEloquent();
 
-// $app->withEloquent();
+ $app->configure('permission');
+ $app->configure('cors');
+// $app->configure('swagger-lume');
+// $app->configure('database');
 
 /*
 |--------------------------------------------------------------------------
@@ -57,13 +65,17 @@ $app->singleton(
 |
 */
 
-// $app->middleware([
-//     App\Http\Middleware\ExampleMiddleware::class
-// ]);
+ $app->middleware([
+     \Barryvdh\Cors\HandleCors::class,
+ ]);
 
-// $app->routeMiddleware([
-//     'auth' => App\Http\Middleware\Authenticate::class,
-// ]);
+ $app->routeMiddleware([
+     'auth' => App\Http\Middleware\Authenticate::class,
+     'cors' => \Barryvdh\Cors\HandleCors::class,
+     'role' => \App\Http\Middleware\Role::class,
+     'permission' => \App\Http\Middleware\Permission::class,
+     'ability' => \App\Http\Middleware\Ability::class,
+ ]);
 
 /*
 |--------------------------------------------------------------------------
@@ -76,8 +88,15 @@ $app->singleton(
 |
 */
 
-// $app->register(App\Providers\AppServiceProvider::class);
-// $app->register(App\Providers\AuthServiceProvider::class);
+ $app->register(App\Providers\AppServiceProvider::class);
+ $app->register(App\Providers\AuthServiceProvider::class);
+ $app->register(\App\Repositories\RepositoriesInjection::class);
+ $app->register(Zizaco\Entrust\EntrustServiceProvider::class);
+ $app->register(Illuminate\Redis\RedisServiceProvider::class);
+ $app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
+ $app->register(Barryvdh\Cors\ServiceProvider::class);
+ $app->register(\SwaggerLume\ServiceProvider::class);
+ $app->register(\Laravel\Horizon\HorizonServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 
 /*
