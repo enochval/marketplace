@@ -14,11 +14,18 @@ class CreateUsersTable extends Migration
     public function up()
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->increments('id');
             $table->string('email')->unique();
-            $table->string('phone_number')->unique();
-            $table->string('status');
-            $table->boolean('bvn_verified')->default(false);
+            $table->string('phone')->unique();
+            $table->string('password');
+            $table->boolean('is_active')->default(false); // This is for active users
+            $table->boolean('is_premium')->default(false); // This is for premium membership
+            $table->boolean('is_confirmed')->default(false); // This will be for email confirmation
+            $table->boolean('is_ban')->default(false); // This is to ban a user from using the system
+            $table->boolean('is_verified')->default(false); // This is to check if a user has paid the one off fee
+            $table->boolean('is_bvn_verified')->default(false);
+            $table->boolean('profile_updated')->default(false); // This is to check if the profile is updated
+            $table->softDeletes();
             $table->timestamps();
         });
     }

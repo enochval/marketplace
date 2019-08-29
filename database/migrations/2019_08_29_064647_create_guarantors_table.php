@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateProfilesTable extends Migration
+class CreateGuarantorsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,21 +13,16 @@ class CreateProfilesTable extends Migration
      */
     public function up()
     {
-        Schema::create('profiles', function (Blueprint $table) {
+        Schema::create('guarantors', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->unsigned();
             $table->string('first_name');
-            $table->string('middle_name')->nullable();
             $table->string('last_name');
-            $table->string('avatar')->nullable();
-            $table->string("gender")->nullable();
-            $table->string('bank_verification_number')->nullable();
-            $table->text('address')->nullable();
-            $table->string('city')->nullable();
-            $table->string('state')->nullable();
-            $table->string('date_of_birth')->nullable();
-            $table->string('latitude')->nullable();
-            $table->string('longitude')->nullable();
+            $table->string('phone');
+            $table->string('email');
+            $table->string('address');
+            $table->string('city');
+            $table->string('state');
             $table->softDeletes();
             $table->timestamps();
 
@@ -43,6 +38,6 @@ class CreateProfilesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('profiles');
+        Schema::dropIfExists('guarantors');
     }
 }

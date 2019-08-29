@@ -11,7 +11,9 @@ use Zizaco\Entrust\Traits\EntrustUserTrait;
 
 class User extends BaseModel implements AuthenticatableContract, AuthorizableContract, JWTSubject
 {
-    use Authenticatable, Authorizable, EntrustUserTrait;
+    use Authenticatable;
+    use EntrustUserTrait;
+//    use Authorizable;
 
     /**
      * The attributes that are mass assignable.
@@ -19,7 +21,7 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
      * @var array
      */
     protected $fillable = [
-        'name', 'email',
+        'phone', 'email', 'password', 'is_active', 'is_premium', 'is_confirmed', 'is_ban', 'is_verified', 'is_bvn_verified', 'profile_updated'
     ];
 
     /**
@@ -28,7 +30,9 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
      * @var array
      */
     protected $hidden = [
+        'id',
         'password',
+        'updated_at'
     ];
 
     /**
@@ -49,5 +53,10 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    public function profile()
+    {
+        return $this->hasOne(Profile::class);
     }
 }

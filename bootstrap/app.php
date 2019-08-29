@@ -21,15 +21,15 @@ $app = new Laravel\Lumen\Application(
     dirname(__DIR__)
 );
  $app->withFacades();
- $app->withFacades(true,
-     [
-         Zizaco\Entrust\EntrustFacade::class => 'Entrust',
-     ]);
+ $app->withFacades(true, [
+     Zizaco\Entrust\EntrustFacade::class => 'Entrust',
+ ]);
 
  $app->withEloquent();
 
  $app->configure('permission');
  $app->configure('cors');
+ $app->configure('entrust');
 // $app->configure('swagger-lume');
 // $app->configure('database');
 
