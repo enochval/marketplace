@@ -91,7 +91,7 @@
 
             {{--url: "{!! $urlToDocs !!}",--}}
             {{--url: "{!! $urlToDocs !!}",--}}
-            url: "{{ secure_url('/api/savyt-api/docs') }}"
+            url: "{{ secure_url('/docs') }}"
             operationsSorter: {!! isset($operationsSorter) ? '"' . $operationsSorter . '"' : 'null' !!},
             configUrl: {!! isset($additionalConfigUrl) ? '"' . $additionalConfigUrl . '"' : 'null' !!},
             validatorUrl: {!! isset($validatorUrl) ? '"' . $validatorUrl . '"' : 'null' !!},
