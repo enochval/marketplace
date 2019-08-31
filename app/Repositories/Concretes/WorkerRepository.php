@@ -22,7 +22,7 @@ class WorkerRepository implements IWorkerRepository
     /**
      * @return mixed
      */
-    public function getWorker()
+    public function getWorker(): User
     {
         return $this->worker;
     }
@@ -82,14 +82,14 @@ class WorkerRepository implements IWorkerRepository
         }
     }
 
-    public function activate()
+    public function activate(): bool
     {
         return $this->worker->update([
             'is_active' => true
         ]);
     }
 
-    public function createVerificationToken()
+    public function createVerificationToken(): bool
     {
         return $this->worker->verificationToken()->create([
             'token' => str_random(40)
@@ -135,29 +135,29 @@ class WorkerRepository implements IWorkerRepository
         $this->setWorker($valid_token->user->id);
     }
 
-    public function confirmWorker()
+    public function confirmWorker(): bool
     {
         return $this->worker->update([
             'is_confirmed' => true
         ]);
     }
 
-    public function isConfirmed()
+    public function isConfirmed(): bool
     {
         return $this->getWorker()->is_confirmed ?? false;
     }
 
-    public function isNotConfirmed()
+    public function isNotConfirmed(): bool
     {
         return !$this->worker->is_confirmed ?? true;
     }
 
-    public function isBan()
+    public function isBan(): bool
     {
         return $this->worker->is_ban ?? true;
     }
 
-    public function authenticate($credentials)
+    public function authenticate($credentials): array
     {
         if (!$token = auth()->attempt($credentials)) {
             throw new Exception("Incorrect email/phone or password");
@@ -183,7 +183,7 @@ class WorkerRepository implements IWorkerRepository
         ];
     }
 
-    public function updateLastLogin($user_id, $ip)
+    public function updateLastLogin($user_id, $ip): void
     {
         $this->setWorker($user_id);
         $this->getWorker()->lastLogin()->updateOrCreate(
