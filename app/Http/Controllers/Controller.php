@@ -25,13 +25,13 @@ class Controller extends BaseController
      *         ),
      *         termsOfService="http://swagger.io/terms/"
      *     ),
+     *      @OA\Server(
+     *         description="staging",
+     *         url="https://timbala-api.herokuapp.com/api/v1"
+     *     ),
      *     @OA\Server(
      *         description="local",
      *         url="http://0.0.0.0:8000/api/v1"
-     *     ),
-     *     @OA\Server(
-     *         description="staging",
-     *         url="https://"
      *     ),
      *     @OA\ExternalDocumentation(
      *         description="Find out more about SLS MFB",
