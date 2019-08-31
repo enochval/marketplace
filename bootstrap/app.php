@@ -30,8 +30,13 @@ $app = new Laravel\Lumen\Application(
  $app->configure('permission');
  $app->configure('cors');
  $app->configure('entrust');
-// $app->configure('swagger-lume');
+ $app->configure('swagger-lume');
 // $app->configure('database');
+
+ $app->configure('mail');
+ $app->alias('mailer', Illuminate\Mail\Mailer::class);
+ $app->alias('mailer', Illuminate\Contracts\Mail\Mailer::class);
+ $app->alias('mailer', Illuminate\Contracts\Mail\MailQueue::class);
 
 /*
 |--------------------------------------------------------------------------
@@ -97,6 +102,7 @@ $app->singleton(
  $app->register(Barryvdh\Cors\ServiceProvider::class);
  $app->register(\SwaggerLume\ServiceProvider::class);
  $app->register(\Laravel\Horizon\HorizonServiceProvider::class);
+ $app->register(Illuminate\Mail\MailServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 
 /*

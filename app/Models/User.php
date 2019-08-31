@@ -32,7 +32,8 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
     protected $hidden = [
         'id',
         'password',
-        'updated_at'
+        'updated_at',
+        'deleted_at'
     ];
 
     /**
@@ -58,5 +59,15 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
     public function profile()
     {
         return $this->hasOne(Profile::class);
+    }
+
+    public function verificationToken()
+    {
+        return $this->hasOne(UsersVerification::class);
+    }
+
+    public function lastLogin()
+    {
+        return $this->hasOne(LastLogin::class);
     }
 }

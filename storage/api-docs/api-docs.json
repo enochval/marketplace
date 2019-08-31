@@ -1,0 +1,191 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Timbala",
+        "description": "This is the service definitions for Timbala.  You can find out more about Timbala. at [https://timbala.now.sh](https://timbala.now.sh).  For this documentaion, you can use the api key `special-key` to test the authorization filters.",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "email": "osarenrenenoch@gmail.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://0.0.0.0:8000/api/v1",
+            "description": "local"
+        },
+        {
+            "url": "https://",
+            "description": "staging"
+        }
+    ],
+    "paths": {
+        "/worker-registration": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register a new worker user",
+                "description": "",
+                "operationId": "workerRegistration",
+                "requestBody": {
+                    "description": "Request object",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "first_name": {
+                                        "description": "",
+                                        "type": "string"
+                                    },
+                                    "last_name": {
+                                        "description": "",
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "description": "",
+                                        "type": "string"
+                                    },
+                                    "phone": {
+                                        "description": "",
+                                        "type": "integer"
+                                    },
+                                    "password": {
+                                        "description": "",
+                                        "type": "string"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Returns response object",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error: Unproccessble Entity. When required parameters were not supplied correctly.",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/confirm-email": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Verify Email",
+                "description": "",
+                "operationId": "verifyEmail",
+                "requestBody": {
+                    "description": "Request object",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "token": {
+                                        "description": "Token",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Returns response object",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error: Unproccessble Entity. When required parameters were not supplied correctly.",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/authenticate": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Authenticate existing user",
+                "description": "",
+                "operationId": "login",
+                "requestBody": {
+                    "description": "Request object",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "description": "Accepts email or phone",
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "description": "",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Returns response object",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error: Unproccessble Entity. When required parameters were not supplied correctly.",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "externalDocs": {
+        "description": "Find out more about SLS MFB",
+        "url": "https://timbala.now.sh"
+    }
+}
