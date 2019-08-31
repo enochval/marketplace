@@ -15,12 +15,12 @@
     },
     "servers": [
         {
-            "url": "http://0.0.0.0:8000/api/v1",
-            "description": "local"
+            "url": "https://timbala-api.herokuapp.com/api/v1",
+            "description": "staging"
         },
         {
-            "url": "https://",
-            "description": "staging"
+            "url": "http://0.0.0.0:8000/api/v1",
+            "description": "local"
         }
     ],
     "paths": {
