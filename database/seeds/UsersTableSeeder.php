@@ -27,7 +27,7 @@ class UsersTableSeeder extends Seeder
         ]);
 
         $admin_user = User::create([
-            'email' => 'admin@timabala.com',
+            'email' => 'admin@timbala.com',
             'phone' => '00000000001',
             'password' => bcrypt('admin'),
             'is_premium' => true,
