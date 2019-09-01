@@ -34,7 +34,7 @@ class Controller extends BaseController
      *         url="http://0.0.0.0:8000/api/v1"
      *     ),
      *     @OA\ExternalDocumentation(
-     *         description="Find out more about SLS MFB",
+     *         description="Find out more about Timbala",
      *         url="https://timbala.now.sh"
      *     )
      * )
