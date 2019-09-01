@@ -89,7 +89,7 @@ class WorkerRepository implements IWorkerRepository
         ]);
     }
 
-    public function createVerificationToken(): bool
+    public function createVerificationToken(): UsersVerification
     {
         return $this->worker->verificationToken()->create([
             'token' => str_random(40)
@@ -105,7 +105,7 @@ class WorkerRepository implements IWorkerRepository
         $this->worker->attachRole($workerRole);
     }
 
-    public function getFullDetails()
+    public function getFullDetails(): User
     {
         return User::with(['profile', 'lastLogin'])->find($this->worker->id);
     }
