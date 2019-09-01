@@ -104,7 +104,7 @@ class AuthController extends Controller
      *     path="/confirm-email",
      *     operationId="verifyEmail",
      *     tags={"Authentication"},
-     *     summary="Verify Email",
+     *     summary="Verify user's e-mail",
      *     description="",
      *     @OA\RequestBody(
      *       required=true,

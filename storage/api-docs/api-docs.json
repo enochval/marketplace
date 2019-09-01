@@ -2,7 +2,7 @@
     "openapi": "3.0.0",
     "info": {
         "title": "Timbala",
-        "description": "This is the service definitions for Timbala.  You can find out more about Timbala. at [https://timbala.now.sh](https://timbala.now.sh).  For this documentaion, you can use the api key `special-key` to test the authorization filters.",
+        "description": "This is the service definitions for Timbala.  You can find out more about Timbala at [https://timbala.now.sh](https://timbala.now.sh).  For this documentaion, you can use the api key `special-key` to test the authorization filters.",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
             "email": "osarenrenenoch@gmail.com"
@@ -185,7 +185,7 @@
         }
     },
     "externalDocs": {
-        "description": "Find out more about SLS MFB",
+        "description": "Find out more about Timbala",
         "url": "https://timbala.now.sh"
     }
 }

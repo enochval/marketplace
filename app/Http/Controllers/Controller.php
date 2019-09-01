@@ -14,7 +14,7 @@ class Controller extends BaseController
      *     @OA\Info(
      *         version="1.0.0",
      *         title="Timbala",
-     *         description="This is the service definitions for Timbala.  You can find out more about Timbala. at [https://timbala.now.sh](https://timbala.now.sh).  For this documentaion, you can use the api key `special-key` to test the authorization filters.",
+     *         description="This is the service definitions for Timbala.  You can find out more about Timbala at [https://timbala.now.sh](https://timbala.now.sh).  For this documentaion, you can use the api key `special-key` to test the authorization filters.",
      *         termsOfService="https://timbala.now.sh/",
      *         @OA\Contact(
      *             email="osarenrenenoch@gmail.com"
