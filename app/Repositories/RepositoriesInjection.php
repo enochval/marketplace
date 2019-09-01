@@ -15,5 +15,10 @@ class RepositoriesInjection extends ServiceProvider
             IWorkerRepository::class,
             WorkerRepository::class
         );
+
+        $this->app->bind(
+            IEmployerRepository::class,
+            EmployerRepository::class
+        );
     }
 }

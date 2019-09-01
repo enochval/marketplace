@@ -13,6 +13,15 @@ class Rules
             'phone' => 'required|unique:users|numeric',
             'password' => 'required|confirmed|min:8'
         ],
+
+        'REGISTER_EMPLOYER' => [
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'email' => 'required|unique:users|email',
+            'phone' => 'required|unique:users|numeric',
+            'password' => 'required|confirmed|min:8'
+        ],
+
         'CONFIRM_EMAIL' => [
             'token' => 'required|string'
         ],
