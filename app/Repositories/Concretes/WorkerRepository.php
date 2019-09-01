@@ -55,7 +55,7 @@ class WorkerRepository implements IWorkerRepository
 
             $worker_id = $worker->id;
             $this->setWorker($worker_id);
-
+            
             $worker->profile()->create([
                 'first_name' => $first_name,
                 'last_name' => $last_name

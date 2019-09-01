@@ -72,7 +72,7 @@ class EmployerRepository implements IEmployerRepository
       if (!$this->activate()) {
         throw new Exception("Could not activate employer user with user_id ${employer_id}");
       }
-
+      
       // Push this verification email to the queue (Basically sends this email to the registered employer)
       dispatch(new SendVerificationEmailJob($this->getEmployer()));
     } catch (Exception $e) {
