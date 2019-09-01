@@ -63,7 +63,7 @@ class EmployerRepository implements IEmployerRepository
 
       // Attach employer role
       $this->assignEmployerRole();
-
+      
       // Generate user verification token
       if (!$this->createVerificationToken()) {
         throw new Exception("Could not create verification token for the registered employer with user_id ${employer_id}");
