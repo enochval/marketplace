@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Repositories\Concretes\WorkerRepository;
+use App\Repositories\Concretes\UserRepository;
 use Exception;
 
 class UpdateLastLoginJob extends Job
@@ -27,10 +27,10 @@ class UpdateLastLoginJob extends Job
      * @param WorkerRepository $workerRepository
      * @return void
      */
-    public function handle(WorkerRepository $workerRepository)
+    public function handle(UserRepository $userRepository)
     {
         try {
-            $workerRepository->updateLastLogin($this->user_id, $this->ip_address);
+            $userRepository->updateLastLogin($this->user_id, $this->ip_address);
         } catch (Exception $e) {
             // Log some errors here
         }

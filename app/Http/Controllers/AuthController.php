@@ -7,6 +7,7 @@ use App\Utils\Rules;
 use Illuminate\Support\Facades\Validator;
 use App\Repositories\Contracts\IWorkerRepository;
 use App\Repositories\Contracts\IEmployerRepository;
+use App\Repositories\Contracts\IUserRepository;
 use function GuzzleHttp\Promise\all;
 
 class AuthController extends Controller
@@ -14,6 +15,7 @@ class AuthController extends Controller
     /**
      * @var IWorkerRepository
      * @var IEmployerRepository
+     * @var IUserRepository
      */
     private $workerRepo;
     private $employerRepo;
@@ -24,11 +26,13 @@ class AuthController extends Controller
      *
      * @param IWorkerRepository $workerRepo
      * @param IEmployerRepository $employerRepo
+     * @param IUserRepository $userRepo
      */
-    public function __construct(IWorkerRepository $workerRepo, IEmployerRepository $employerRepo)
+    public function __construct(IWorkerRepository $workerRepo, IEmployerRepository $employerRepo, IUserRepository $userRepo)
     {
         $this->workerRepo = $workerRepo;
         $this->employerRepo = $employerRepo;
+        $this->userRepo = $userRepo;
     }
 
     /**
@@ -210,7 +214,7 @@ class AuthController extends Controller
         } else {
             $credentials = request()->only(['email', 'password']);
         }
-
+        
         try {
             $auth = $this->userRepo->authenticate($credentials);
             return $this->withData($auth);
@@ -292,115 +296,5 @@ class AuthController extends Controller
             return $this->error($e->getMessage());
         }
     }
-
-    /**
-     * @OA\Post(
-     *     path="/confirm-email",
-     *     operationId="verifyEmail",
-     *     tags={"Authentication"},
-     *     summary="Verify Email",
-     *     description="",
-     *     @OA\RequestBody(
-     *       required=true,
-     *       description="Request object",
-     *       @OA\MediaType(
-     *           mediaType="application/json",
-     *           @OA\Schema(
-     *              type="object",
-     *              @OA\Property(
-     *                  property="token",
-     *                  description="Token",
-     *                  type="string",
-     *              )
-     *           )
-     *       )
-     *     ),
-     *     @OA\Response(
-     *         response="200",
-     *         description="Returns response object",
-     *         @OA\JsonContent()
-     *     ),
-     *     @OA\Response(
-     *          response="422",
-     *          description="Error: Unproccessble Entity. When required parameters were not supplied correctly.",
-     *          @OA\JsonContent()
-     *     )
-     * )
-     */
-    public function confirmEmployerEmail()
-    {
-        $payload = request()->only(['token']);
-
-        $validator = Validator::make($payload, Rules::get('CONFIRM_EMAIL'));
-        if ($validator->fails()) {
-            return $this->validationErrors($validator->getMessageBag()->all());
-        }
-
-        ['token' => $token] = $payload;
-
-        try {
-            $this->employerRepo->verifyEmail($token);
-            return $this->success("E-mail successfully verified! Kindly login to access every opportunity Timbala has to offer!");
-        } catch (Exception $e) {
-            return $this->error($e->getMessage());
-        }
-    }
-
-    /**
-     * @OA\Post(
-     *     path="/authenticate",
-     *     operationId="login",
-     *     tags={"Authentication"},
-     *     summary="Authenticate existing user",
-     *     description="",
-     *     @OA\RequestBody(
-     *       required=true,
-     *       description="Request object",
-     *       @OA\MediaType(
-     *           mediaType="application/json",
-     *           @OA\Schema(
-     *              type="object",
-     *              @OA\Property(
-     *                  property="email",
-     *                  description="Accepts email or phone",
-     *                  type="string",
-     *              ),
-     *              @OA\Property(
-     *                  property="password",
-     *                  description="",
-     *                  type="string",
-     *              )
-     *           )
-     *       )
-     *     ),
-     *     @OA\Response(
-     *         response="200",
-     *         description="Returns response object",
-     *         @OA\JsonContent()
-     *     ),
-     *     @OA\Response(
-     *          response="422",
-     *          description="Error: Unproccessble Entity. When required parameters were not supplied correctly.",
-     *          @OA\JsonContent()
-     *     )
-     * )
-     */
-    public function authenticateEmployer()
-    {
-        $validator = Validator::make(request()->all(), Rules::get('AUTHENTICATE'));
-        if ($validator->fails()) {
-            return $this->validationErrors($validator->getMessageBag()->all());
-        }
-
-        $credentials = request()->only(['email', 'password']);
-
-        try {
-            $auth = $this->employerRepo->authenticate($credentials);
-            return $this->withData($auth);
-        } catch (Exception $e) {
-            return $this->error($e->getMessage());
-        }
-    }
-
 }
 

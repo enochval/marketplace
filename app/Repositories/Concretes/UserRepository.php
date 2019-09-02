@@ -72,6 +72,21 @@ class UserRepository implements IUserRepository
     return $this->getUser()->is_confirmed ?? false;
   }
 
+  public function isNotConfirmed()
+  {
+    return !$this->user->is_confirmed ?? true;
+  }
+
+  public function isBan()
+  {
+    return $this->user->is_ban ?? true;
+  }
+
+  public function getFullDetails()
+  {
+    return User::with(['profile', 'lastLogin'])->find($this->user->id);
+  }
+
   public function confirmUser()
   {
     return $this->user->update([
@@ -96,5 +111,17 @@ class UserRepository implements IUserRepository
     } catch (Exception $e) {
       throw new Exception($e->getMessage());
     }
+  }
+
+  public function updateLastLogin($user_id, $ip)
+  {
+    $this->setUser($user_id);
+    $this->getUser()->lastLogin()->updateOrCreate(
+      ['user_id' => $this->user->id],
+      [
+        'last_login_at' => Carbon::now()->toDateTimeString(),
+        'last_login_ip' => $ip
+      ]
+    );
   }
 }
