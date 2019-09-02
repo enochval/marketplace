@@ -7,6 +7,8 @@ use App\Repositories\Concretes\WorkerRepository;
 use App\Repositories\Contracts\IWorkerRepository;
 use App\Repositories\Concretes\EmployerRepository;
 use App\Repositories\Contracts\IEmployerRepository;
+use App\Repositories\Concretes\UserRepository;
+use App\Repositories\Contracts\IUserRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoriesInjection extends ServiceProvider
@@ -21,6 +23,11 @@ class RepositoriesInjection extends ServiceProvider
         $this->app->bind(
             IEmployerRepository::class,
             EmployerRepository::class
+        );
+
+        $this->app->bind(
+            IUserRepository::class,
+            UserRepository::class
         );
     }
 }

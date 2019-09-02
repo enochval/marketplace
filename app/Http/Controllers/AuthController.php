@@ -17,6 +17,7 @@ class AuthController extends Controller
      */
     private $workerRepo;
     private $employerRepo;
+    private $userRepo;
 
     /**
      * Create a new controller instance.
@@ -150,7 +151,7 @@ class AuthController extends Controller
         ['token' => $token] = $payload;
 
         try {
-            $this->workerRepo->verifyEmail($token);
+            $this->userRepo->verifyEmail($token);
             return $this->success("E-mail successfully verified! Kindly login to access every opportunity Timbala has to offer!");
         } catch (Exception $e) {
             return $this->error($e->getMessage());
@@ -211,7 +212,7 @@ class AuthController extends Controller
         }
 
         try {
-            $auth = $this->workerRepo->authenticate($credentials);
+            $auth = $this->userRepo->authenticate($credentials);
             return $this->withData($auth);
         } catch (Exception $e) {
             return $this->error($e->getMessage());
