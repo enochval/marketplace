@@ -10,7 +10,7 @@ class Rules
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'email' => 'sometimes|unique:users|email',
-            'phone' => 'required|unique:users|numeric',
+            'phone' => 'required|unique:users|digits:11',
             'password' => 'required|confirmed|min:8'
         ],
 
@@ -18,7 +18,7 @@ class Rules
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'email' => 'required|unique:users|email',
-            'phone' => 'required|unique:users|numeric',
+            'phone' => 'required|unique:users|digits:11',
             'password' => 'required|confirmed|min:8'
         ],
 
