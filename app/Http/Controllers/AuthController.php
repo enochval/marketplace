@@ -67,7 +67,7 @@ class AuthController extends Controller
      *              @OA\Property(
      *                  property="phone",
      *                  description="",
-     *                  type="integer",
+     *                  type="string",
      *              ),
      *              @OA\Property(
      *                  property="password",
@@ -255,7 +255,7 @@ class AuthController extends Controller
      *              @OA\Property(
      *                  property="phone",
      *                  description="",
-     *                  type="integer",
+     *                  type="string",
      *              ),
      *              @OA\Property(
      *                  property="password",
