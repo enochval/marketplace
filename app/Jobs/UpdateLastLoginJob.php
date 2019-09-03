@@ -24,7 +24,7 @@ class UpdateLastLoginJob extends Job
     /**
      * Execute the job.
      *
-     * @param WorkerRepository $workerRepository
+     * @param UserRepository $userRepository
      * @return void
      */
     public function handle(UserRepository $userRepository)
