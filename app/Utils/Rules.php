@@ -25,6 +25,7 @@ class Rules
         'CONFIRM_EMAIL' => [
             'token' => 'required|string'
         ],
+
         'AUTHENTICATE' => [
             'email' => 'required',
             'password' => 'required'

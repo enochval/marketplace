@@ -7,7 +7,7 @@ interface IUserRepository
 {
   public function verifyEmail($token);
 
-  public function authenticate($credentials);
+  public function authenticate(array $credentials);
 
   public function updateLastLogin($user_id, $ip);
 }

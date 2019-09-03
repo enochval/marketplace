@@ -214,7 +214,7 @@ class AuthController extends Controller
         } else {
             $credentials = request()->only(['email', 'password']);
         }
-        
+
         try {
             $auth = $this->userRepo->authenticate($credentials);
             return $this->withData($auth);
@@ -225,10 +225,10 @@ class AuthController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/worker-registration",
-     *     operationId="workerRegistration",
+     *     path="/employer-registration",
+     *     operationId="employerRegistration",
      *     tags={"Authentication"},
-     *     summary="Register a new worker user",
+     *     summary="Register a new employer user",
      *     description="",
      *     @OA\RequestBody(
      *       required=true,

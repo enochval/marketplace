@@ -182,6 +182,71 @@
                     }
                 }
             }
+        },
+        "/employer-registration": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register a new employer user",
+                "description": "",
+                "operationId": "employerRegistration",
+                "requestBody": {
+                    "description": "Request object",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "first_name": {
+                                        "description": "",
+                                        "type": "string"
+                                    },
+                                    "last_name": {
+                                        "description": "",
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "description": "",
+                                        "type": "string"
+                                    },
+                                    "phone": {
+                                        "description": "",
+                                        "type": "integer"
+                                    },
+                                    "password": {
+                                        "description": "",
+                                        "type": "string"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Returns response object",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error: Unproccessble Entity. When required parameters were not supplied correctly.",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "externalDocs": {

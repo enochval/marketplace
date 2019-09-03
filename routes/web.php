@@ -17,7 +17,7 @@ $router->get('/', function () use ($router) {
 
 $router->group(['prefix' => 'api/v1'], function () use($router) {
     $router->post('worker-registration', 'AuthController@registerWorker');
+    $router->post('employer-registration', 'AuthController@registerEmployer');
     $router->post('confirm-email', 'AuthController@confirmEmail');
     $router->post('authenticate', 'AuthController@authenticate');
-    $router->post('employer-registration', 'AuthController@registerEmployer');
 });
