@@ -29,7 +29,18 @@ class Rules
         'AUTHENTICATE' => [
             'email' => 'required',
             'password' => 'required'
-        ]
+        ],
+
+        'UPDATE_EMPLOYER' => [
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'gender' => 'required|string',
+            'bank_verification_number' => 'numeric',
+            'address' => 'string',
+            'city' => 'string',
+            'state' => 'string',
+            'date_of_birth' => 'string',
+        ],
     ];
 
     public static function get($rule)

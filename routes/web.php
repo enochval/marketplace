@@ -20,4 +20,13 @@ $router->group(['prefix' => 'api/v1'], function () use($router) {
     $router->post('employer-registration', 'AuthController@registerEmployer');
     $router->post('confirm-email', 'AuthController@confirmEmail');
     $router->post('authenticate', 'AuthController@authenticate');
+
+    // protected routes group
+    $router->group(['middleware' => 'auth:api'], function () use($router) {
+            $router->post('employer-update-profile', 'UserController@updateEmployer');
+            $router->get('employer-edit-profile', 'UserController@editEmployer');
+        });
+
+    // $router->post('employer-update-profile', 'UserController@updateEmployer');
+
 });

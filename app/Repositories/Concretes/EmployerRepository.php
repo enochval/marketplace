@@ -7,6 +7,7 @@ use App\Jobs\SendWelcomeEmailJob;
 use App\Jobs\UpdateLastLoginJob;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\Profile;
 use App\Jobs\SendVerificationEmailJob;
 use App\Models\UsersVerification;
 use App\Repositories\Contracts\IEmployerRepository;
@@ -115,4 +116,77 @@ class EmployerRepository implements IEmployerRepository
     {
         return User::with(['profile', 'lastLogin'])->find($this->employer->id);
     }
+
+    public function updateProfile($params): void
+    {
+        try {
+
+            if ($params->hasFile('avatar')) {
+                //Get full filename
+                $filenameWithExt = $params->file('avatar')->getClientOriginalName();
+
+                //Extract filename only
+                $filenameWithoutExt = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+
+                //Extract extenstion only
+                $extension = $params->file('avatar')->getClientOriginalExtension();
+
+                //Combine again with timestamp in the middle to differentiate files with same filename.
+                $filenameToStore = $filenameWithoutExt . '_' . time() . '.' . $extension;
+                $path = $params->file('avatar')->storeAs('public/avatar', $filenameToStore);
+            }
+            
+            [
+                'first_name' => $first_name,
+                'last_name' => $last_name,
+                'bvn' => $bvn,
+                'address' => $address,
+                'city' => $city,
+                'state' => $state,
+                'date_of_birth' => $date_of_birth,
+                'avatar' => $avatar,
+            ] = $params;
+            
+            $employer = User::where('id', auth()->user()->id)->first();
+            
+            $employer->profile()->updateOrInsert([
+                'first_name' => $first_name,
+                'last_name' => $last_name,
+                'bank_verification_number' => $bvn,
+                'address' => $address,
+                'city' => $city,
+                'state' => $state,
+                'date_of_birth' => $date_of_birth,
+                'avatar' => $avatar,
+            ]);
+
+            $employer->profile_updated = true;
+            $employer->save();
+
+            $employer_id = $employer->id;
+            $this->setEmployer($employer_id);
+
+            // Push this verification email to the queue (Basically sends this email to the registered employer)
+            dispatch(new SendProfileUpdatedEmailJob($this->getEmployer()));
+        } catch (Exception $e) {
+            // Log the actual error to your logger... that's $e->getMessage()...
+
+            // Return a custom error message back....
+            throw new Exception("Unable to create user, please try again");
+            
+        }
+    }
+
+
+    public function editProfile()
+    {
+        //load the profile to edit
+        $profile = Profile::where('user_id', auth()->user()->id)->firstOrFail();
+        return [
+            'payload' => $this->getFullDetails()
+        ];    
+        
+        return $profile;
+    }
+    
 }
