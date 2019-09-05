@@ -125,6 +125,7 @@ class EmployerRepository implements IEmployerRepository
             [
                 'first_name' => $first_name,
                 'last_name' => $last_name,
+                'gender' => $gender,
                 'bvn' => $bvn,
                 'address' => $address,
                 'city' => $city,
@@ -146,6 +147,7 @@ class EmployerRepository implements IEmployerRepository
             $employer->profile()->update([
                 'first_name' => $first_name,
                 'last_name' => $last_name,
+                'gender' => $gender,
                 'bank_verification_number' => $bvn,
                 'address' => $address,
                 'city' => $city,
@@ -159,8 +161,6 @@ class EmployerRepository implements IEmployerRepository
 
             $employer_id = $employer->id;
             $this->setEmployer($employer_id);
-
-            // dd($this->getEmployer());
             
             // Push notification message to employer
             dispatch(new SendProfileUpdateEmailJob($this->getEmployer()));

@@ -30,8 +30,84 @@ class UserController extends Controller
   }
   
   /**
-   * 
-   */
+     * @OA\Post(
+     *     path="/employer-update-profile",
+     *     operationId="employerUpdateProfile",
+     *     tags={"UpdateProfile"},
+     *     summary="Update employer profile",
+     *     description="",
+     *     @OA\RequestBody(
+     *       required=true,
+     *       description="Request object",
+     *       @OA\MediaType(
+     *           mediaType="application/json",
+     *           @OA\Schema(
+     *              type="object",
+     *              @OA\Property(
+     *                  property="first_name",
+     *                  description="",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="last_name",
+     *                  description="",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="gender",
+     *                  description="",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="bank_verification_number",
+     *                  description="",
+     *                  type="integer",
+     *              ),
+     *              @OA\Property(
+     *                  property="address",
+     *                  description="",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="city",
+     *                  description="",
+     *                  type="string",
+     *              )
+     *              @OA\Property(
+     *                  property="state",
+     *                  description="",
+     *                  type="string",
+     *              )
+     *              @OA\Property(
+     *                  property="date_of_birth",
+     *                  description="",
+     *                  type="string",
+     *              )
+     *              @OA\Property(
+     *                  property="avatar",
+     *                  description="",
+     *                  type="string",
+     *              )
+     *              @OA\Property(
+     *                  property="city",
+     *                  description="",
+     *                  type="string",
+     *              )
+     *           )
+     *       )
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns response object",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *          response="422",
+     *          description="Error: Unproccessble Entity. When required parameters were not supplied correctly.",
+     *          @OA\JsonContent()
+     *     )
+     * )
+     */
   public function updateEmployer(Request $request)
   {
     $validator = Validator::make(request()->all(), Rules::get('UPDATE_EMPLOYER'));
@@ -41,12 +117,14 @@ class UserController extends Controller
 
     try {
       $this->employerRepo->updateProfile($request);
-      return $this->withData("Profile update successful!");
+      return $this->withData("Profile updated successfully!");
     } catch (Exception $e) {
       return $this->error($e->getMessage());
     }
   }
 
+
+  
   public function editEmployer()
   {
     try{
