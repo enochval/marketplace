@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Exception;
 use App\Utils\Rules;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Repositories\Contracts\IWorkerRepository;
 use App\Repositories\Contracts\IEmployerRepository;
@@ -31,7 +32,7 @@ class UserController extends Controller
   /**
    * 
    */
-  public function updateEmployer()
+  public function updateEmployer(Request $request)
   {
     $validator = Validator::make(request()->all(), Rules::get('UPDATE_EMPLOYER'));
     if ($validator->fails()) {
@@ -39,8 +40,8 @@ class UserController extends Controller
     }
 
     try {
-      $this->employerRepo->updateProfile(request()->all());
-      return $this->withData("Registration successful, check your e-mail and kindly click to verify!");
+      $this->employerRepo->updateProfile($request);
+      return $this->withData("Profile update successful!");
     } catch (Exception $e) {
       return $this->error($e->getMessage());
     }
@@ -49,7 +50,8 @@ class UserController extends Controller
   public function editEmployer()
   {
     try{
-      $this->employerRepo->editProfile();
+      $employerProfile = $this->employerRepo->editProfile();
+      return $this->withData($employerProfile);
     } catch (Exception $e) {
       return $this->error($e->getMessage());
     }

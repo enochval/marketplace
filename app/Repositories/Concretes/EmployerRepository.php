@@ -8,6 +8,7 @@ use App\Jobs\UpdateLastLoginJob;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Profile;
+use App\Jobs\SendProfileUpdateEmailJob;
 use App\Jobs\SendVerificationEmailJob;
 use App\Models\UsersVerification;
 use App\Repositories\Contracts\IEmployerRepository;
@@ -117,24 +118,9 @@ class EmployerRepository implements IEmployerRepository
         return User::with(['profile', 'lastLogin'])->find($this->employer->id);
     }
 
-    public function updateProfile($params): void
+    public function updateProfile($request): void
     {
         try {
-
-            if ($params->hasFile('avatar')) {
-                //Get full filename
-                $filenameWithExt = $params->file('avatar')->getClientOriginalName();
-
-                //Extract filename only
-                $filenameWithoutExt = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-
-                //Extract extenstion only
-                $extension = $params->file('avatar')->getClientOriginalExtension();
-
-                //Combine again with timestamp in the middle to differentiate files with same filename.
-                $filenameToStore = $filenameWithoutExt . '_' . time() . '.' . $extension;
-                $path = $params->file('avatar')->storeAs('public/avatar', $filenameToStore);
-            }
             
             [
                 'first_name' => $first_name,
@@ -144,12 +130,20 @@ class EmployerRepository implements IEmployerRepository
                 'city' => $city,
                 'state' => $state,
                 'date_of_birth' => $date_of_birth,
-                'avatar' => $avatar,
-            ] = $params;
+            ] = $request;
+
+            if ($request->hasFile('avatar')) {
+
+                $filenameToStore = $this->getFileNameToStore($request);
+                $path = $request->file('avatar')->storeAs('public/avatar', $filenameToStore);
+
+            } else {
+                $filenameToStore = 'noimage.jpg';
+            }
             
             $employer = User::where('id', auth()->user()->id)->first();
             
-            $employer->profile()->updateOrInsert([
+            $employer->profile()->update([
                 'first_name' => $first_name,
                 'last_name' => $last_name,
                 'bank_verification_number' => $bvn,
@@ -157,7 +151,7 @@ class EmployerRepository implements IEmployerRepository
                 'city' => $city,
                 'state' => $state,
                 'date_of_birth' => $date_of_birth,
-                'avatar' => $avatar,
+                'avatar' => $filenameToStore,
             ]);
 
             $employer->profile_updated = true;
@@ -166,27 +160,46 @@ class EmployerRepository implements IEmployerRepository
             $employer_id = $employer->id;
             $this->setEmployer($employer_id);
 
-            // Push this verification email to the queue (Basically sends this email to the registered employer)
-            dispatch(new SendProfileUpdatedEmailJob($this->getEmployer()));
+            // dd($this->getEmployer());
+            
+            // Push notification message to employer
+            dispatch(new SendProfileUpdateEmailJob($this->getEmployer()));
         } catch (Exception $e) {
             // Log the actual error to your logger... that's $e->getMessage()...
 
             // Return a custom error message back....
-            throw new Exception("Unable to create user, please try again");
+            throw new Exception("Unable to update profile, please try again");
             
         }
     }
 
+    
 
     public function editProfile()
     {
         //load the profile to edit
-        $profile = Profile::where('user_id', auth()->user()->id)->firstOrFail();
-        return [
-            'payload' => $this->getFullDetails()
-        ];    
+        $employerProfile = Profile::where('user_id', auth()->user()->id)->firstOrFail();
         
-        return $profile;
+        return [
+            'payload' => $employerProfile
+        ];    
+    }
+
+    public function getFileNameToStore($request)
+    {
+        //Get full filename
+        $filenameWithExt = $request->file('avatar')->getClientOriginalName();
+
+        //Extract filename only
+        $filenameWithoutExt = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+
+        //Extract extenstion only
+        $extension = $request->file('avatar')->getClientOriginalExtension();
+
+        //Combine again with timestamp in the middle to differentiate files with same filename.
+        $filenameToStore = $filenameWithoutExt . '_' . time() . '.' . $extension;
+        
+        return $filenameToStore;
     }
     
 }
