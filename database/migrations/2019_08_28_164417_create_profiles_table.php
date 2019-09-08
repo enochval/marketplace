@@ -19,7 +19,7 @@ class CreateProfilesTable extends Migration
             $table->string('first_name');
             $table->string('middle_name')->nullable();
             $table->string('last_name');
-            $table->string('avatar')->nullable();
+            $table->longText('avatar')->nullable();
             $table->string("gender")->nullable();
             $table->string('bank_verification_number')->nullable();
             $table->text('address')->nullable();
@@ -28,6 +28,7 @@ class CreateProfilesTable extends Migration
             $table->string('date_of_birth')->nullable();
             $table->string('latitude')->nullable();
             $table->string('longitude')->nullable();
+            $table->text('bio')->nullable();
             $table->softDeletes();
             $table->timestamps();
 
