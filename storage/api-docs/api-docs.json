@@ -53,7 +53,7 @@
                                     },
                                     "phone": {
                                         "description": "",
-                                        "type": "integer"
+                                        "type": "string"
                                     },
                                     "password": {
                                         "description": "",
@@ -212,7 +212,7 @@
                                     },
                                     "phone": {
                                         "description": "",
-                                        "type": "integer"
+                                        "type": "string"
                                     },
                                     "password": {
                                         "description": "",

@@ -10,7 +10,7 @@ class Rules
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'email' => 'sometimes|unique:users|email',
-            'phone' => 'required|unique:users|numeric',
+            'phone' => 'required|unique:users|digits:11',
             'password' => 'required|confirmed|min:8'
         ],
 
@@ -18,7 +18,7 @@ class Rules
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'email' => 'required|unique:users|email',
-            'phone' => 'required|unique:users|numeric',
+            'phone' => 'required|unique:users|digits:11',
             'password' => 'required|confirmed|min:8'
         ],
 
@@ -31,16 +31,33 @@ class Rules
             'password' => 'required'
         ],
 
-        'UPDATE_EMPLOYER' => [
+        'UPDATE_PROFILE' => [
             'first_name' => 'required|string',
             'last_name' => 'required|string',
+            'avatar' => 'required',
             'gender' => 'required|string',
-            'bank_verification_number' => 'numeric',
-            'address' => 'string',
-            'city' => 'string',
-            'state' => 'string',
-            'date_of_birth' => 'string',
+            'date_of_birth' => 'required|string',
+            'address' => 'required|string',
+            'city' => 'required|string',
+            'state' => 'required|string',
+            'bio' => 'required|string',
         ],
+
+        'WORK_HISTORY' => [
+            'employer' => 'required|string',
+            'position' => 'required|string',
+            'start_date' => 'required|string',
+            'end_date' => 'required|string',
+        ],
+
+        'WORKER_SKILLS' => [
+            'names' => 'required|array',
+            'category_id' => 'required|numeric'
+        ],
+
+        'BVN_VERIFICATION' => [
+            'bvn' => 'required'
+        ]
     ];
 
     public static function get($rule)

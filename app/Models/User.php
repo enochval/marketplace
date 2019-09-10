@@ -70,4 +70,14 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
     {
         return $this->hasOne(LastLogin::class);
     }
+
+    public function workHistory()
+    {
+        return $this->hasMany(WorkHistory::class);
+    }
+
+    public function workerSkill()
+    {
+        return $this->hasOne(WorkerSkill::class);
+    }
 }

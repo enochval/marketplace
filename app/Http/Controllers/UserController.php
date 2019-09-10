@@ -1,137 +1,98 @@
 <?php
 
+
 namespace App\Http\Controllers;
 
-use Exception;
-use App\Utils\Rules;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use App\Repositories\Contracts\IWorkerRepository;
-use App\Repositories\Contracts\IEmployerRepository;
+
 use App\Repositories\Contracts\IUserRepository;
-use function GuzzleHttp\Promise\all;
+use App\Repositories\Contracts\IWorkerRepository;
+use App\Utils\Rules;
+use Exception;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
-  /**
-   * @var IUserRepository
-   */
-  private $userRepo;
-  private $employerRepo;
-
-  /**
-   * Create a new controller instance.
-   * @param IUserRepository $userRepo
-   */
-  public function __construct(IUserRepository $userRepo, IEmployerRepository $employerRepo)
-  {
-    $this->userRepo = $userRepo;
-    $this->employerRepo = $employerRepo;
-  }
-  
-  /**
-     * @OA\Post(
-     *     path="/employer-update-profile",
-     *     operationId="employerUpdateProfile",
-     *     tags={"UpdateProfile"},
-     *     summary="Update employer profile",
-     *     description="",
-     *     @OA\RequestBody(
-     *       required=true,
-     *       description="Request object",
-     *       @OA\MediaType(
-     *           mediaType="application/json",
-     *           @OA\Schema(
-     *              type="object",
-     *              @OA\Property(
-     *                  property="first_name",
-     *                  description="",
-     *                  type="string",
-     *              ),
-     *              @OA\Property(
-     *                  property="last_name",
-     *                  description="",
-     *                  type="string",
-     *              ),
-     *              @OA\Property(
-     *                  property="gender",
-     *                  description="",
-     *                  type="string",
-     *              ),
-     *              @OA\Property(
-     *                  property="bank_verification_number",
-     *                  description="",
-     *                  type="integer",
-     *              ),
-     *              @OA\Property(
-     *                  property="address",
-     *                  description="",
-     *                  type="string",
-     *              ),
-     *              @OA\Property(
-     *                  property="city",
-     *                  description="",
-     *                  type="string",
-     *              )
-     *              @OA\Property(
-     *                  property="state",
-     *                  description="",
-     *                  type="string",
-     *              )
-     *              @OA\Property(
-     *                  property="date_of_birth",
-     *                  description="",
-     *                  type="string",
-     *              )
-     *              @OA\Property(
-     *                  property="avatar",
-     *                  description="",
-     *                  type="string",
-     *              )
-     *              @OA\Property(
-     *                  property="city",
-     *                  description="",
-     *                  type="string",
-     *              )
-     *           )
-     *       )
-     *     ),
-     *     @OA\Response(
-     *         response="200",
-     *         description="Returns response object",
-     *         @OA\JsonContent()
-     *     ),
-     *     @OA\Response(
-     *          response="422",
-     *          description="Error: Unproccessble Entity. When required parameters were not supplied correctly.",
-     *          @OA\JsonContent()
-     *     )
-     * )
+    /**
+     * @var IWorkerRepository
      */
-  public function updateEmployer(Request $request)
-  {
-    $validator = Validator::make(request()->all(), Rules::get('UPDATE_EMPLOYER'));
-    if ($validator->fails()) {
-      return $this->validationErrors($validator->getMessageBag()->all());
+    private $workerRepository;
+    /**
+     * @var IUserRepository
+     */
+    private $userRepository;
+
+    /**
+     * UserController constructor.
+     * @param IWorkerRepository $workerRepository
+     * @param IUserRepository $userRepository
+     */
+    public function __construct(IWorkerRepository $workerRepository, IUserRepository $userRepository)
+    {
+        $this->workerRepository = $workerRepository;
+        $this->userRepository = $userRepository;
     }
 
-    try {
-      $this->employerRepo->updateProfile($request);
-      return $this->withData("Profile updated successfully!");
-    } catch (Exception $e) {
-      return $this->error($e->getMessage());
-    }
-  }
+    public function updateProfile()
+    {
+        $payload = request()->all();
+        $validator = Validator::make($payload, Rules::get('UPDATE_PROFILE'));
+        if ($validator->fails()) {
+            return $this->validationErrors($validator->getMessageBag()->all());
+        }
 
-
-  
-  public function editEmployer()
-  {
-    try{
-      $employerProfile = $this->employerRepo->editProfile();
-      return $this->withData($employerProfile);
-    } catch (Exception $e) {
-      return $this->error($e->getMessage());
+        try {
+            $profile = $this->userRepository->profile(auth()->id(), $payload);
+            return $this->withData($profile);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
     }
-  }
+
+    public function workHistory()
+    {
+        $payload = request()->all();
+        $validator = Validator::make($payload, Rules::get('WORK_HISTORY'));
+        if ($validator->fails()) {
+            return $this->validationErrors($validator->getMessageBag()->all());
+        }
+
+        try {
+            $profile = $this->workerRepository->workHistory(auth()->id(), $payload);
+            return $this->withData($profile);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    public function workerSkills()
+    {
+        $payload = request()->all();
+        $validator = Validator::make($payload, Rules::get('WORKER_SKILLS'));
+        if ($validator->fails()) {
+            return $this->validationErrors($validator->getMessageBag()->all());
+        }
+
+        try {
+            $profile = $this->workerRepository->workerSkills(auth()->id(), $payload);
+            return $this->withData($profile);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    public function bvnVerification()
+    {
+        $payload = request()->all();
+        $validator = Validator::make($payload, Rules::get('BVN_VERIFICATION'));
+        if ($validator->fails()) {
+            return $this->validationErrors($validator->getMessageBag()->all());
+        }
+
+        try {
+            $profile = $this->userRepository->workerSkills(auth()->id(), $payload);
+            return $this->withData($profile);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
 }
