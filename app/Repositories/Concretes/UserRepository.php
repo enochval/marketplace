@@ -5,6 +5,7 @@ namespace App\Repositories\Concretes;
 
 use App\Jobs\SendWelcomeEmailJob;
 use App\Jobs\UpdateLastLoginJob;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\UsersVerification;
 use App\Repositories\Contracts\IUserRepository;
@@ -133,5 +134,43 @@ class UserRepository implements IUserRepository
                 'last_login_ip' => $ip
             ]
         );
+    }
+
+    public function profile(int $user_id, array $params): User
+    {
+        $this->setUser($user_id);
+
+        $this->getUser()->profile()->update([
+            'first_name' => $params['first_name'],
+            'last_name' => $params['last_name'],
+            'gender' => $params['gender'],
+            'date_of_birth' => $params['date_of_birth'],
+            'avatar' => $params['avatar'],
+            'address' => $params['address'],
+            'city' => $params['city'],
+            'state' => $params['state'],
+            'bio' => $params['bio']
+        ]);
+
+        if ($this->getUser()->hasRole(Role::WORKER)) {
+            // return worker's full details
+        } elseif ($this->getUser()->hasRole(Role::EMPLOYER)) {
+            // return employer's full details
+        } elseif ($this->getUser()->hasRole(Role::AGENT)) {
+            // return agent's full details
+        } elseif ($this->getUser()->hasRole(Role::ADMIN)) {
+            // return agent's full details
+        }
+    }
+
+    public function bvnVerification(int $user_id, int $bvn)
+    {
+        $this->setUser($user_id);
+
+        // store the bvn in profile
+
+        // create transaction initials
+
+        // initialize payment on paystack
     }
 }

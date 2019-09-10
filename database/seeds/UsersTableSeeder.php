@@ -79,10 +79,10 @@ class UsersTableSeeder extends Seeder
         ]);
 
         $super_admin_role = Role::where('name', 'super_admin')->first();
-        $admin_role = Role::where('name', 'admin')->first();
-        $agent_role = Role::where('name', 'agent')->first();
-        $employer_role = Role::where('name', 'employer')->first();
-        $worker_role = Role::where('name', 'worker')->first();
+        $admin_role = Role::where('name', Role::ADMIN)->first();
+        $agent_role = Role::where('name', Role::AGENT)->first();
+        $employer_role = Role::where('name', Role::EMPLOYER)->first();
+        $worker_role = Role::where('name', Role::WORKER)->first();
 
         $super_admin_user->attachRole($super_admin_role);
         $admin_user->attachRole($admin_role);

@@ -103,7 +103,7 @@ class AuthController extends Controller
 
         try {
             $this->workerRepo->register(request()->all());
-            return $this->withData("Registration successful, check your e-mail and kindly click to verify!");
+            return $this->success("Registration successful, check your e-mail and kindly click to verify!");
         } catch (Exception $e) {
             return $this->error($e->getMessage());
         }
@@ -291,7 +291,7 @@ class AuthController extends Controller
 
         try {
             $this->employerRepo->register(request()->all());
-            return $this->withData("Registration successful, check your e-mail and kindly click to verify!");
+            return $this->success("Registration successful, check your e-mail and kindly click to verify!");
         } catch (Exception $e) {
             return $this->error($e->getMessage());
         }

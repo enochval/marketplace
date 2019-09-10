@@ -29,6 +29,34 @@ class Rules
         'AUTHENTICATE' => [
             'email' => 'required',
             'password' => 'required'
+        ],
+
+        'UPDATE_PROFILE' => [
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'avatar' => 'required',
+            'gender' => 'required|string',
+            'date_of_birth' => 'required|string',
+            'address' => 'required|string',
+            'city' => 'required|string',
+            'state' => 'required|string',
+            'bio' => 'required|string',
+        ],
+
+        'WORK_HISTORY' => [
+            'employer' => 'required|string',
+            'position' => 'required|string',
+            'start_date' => 'required|string',
+            'end_date' => 'required|string',
+        ],
+
+        'WORKER_SKILLS' => [
+            'names' => 'required|array',
+            'category_id' => 'required|numeric'
+        ],
+
+        'BVN_VERIFICATION' => [
+            'bvn' => 'required'
         ]
     ];
 

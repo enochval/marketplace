@@ -140,4 +140,30 @@ class WorkerRepository implements IWorkerRepository
             ]
         );
     }
+
+    public function workHistory(int $user_id, array $params): User
+    {
+        $this->setWorker($user_id);
+
+        $this->getWorker()->workHistory()->create([
+            'employer' => $params['employer'],
+            'position' => $params['position'],
+            'start_date' => $params['start_date'],
+            'end_date' => $params['end_date'],
+        ]);
+
+        return $this->getFullDetails();
+    }
+
+    public function workerSkills(int $user_id, array $params)
+    {
+        $this->setWorker($user_id);
+
+        $this->getWorker()->workerSkill()->create([
+            'names' => json_encode($params['names']),
+            'category_id' => $params['category_id']
+        ]);
+
+        return $this->getFullDetails();
+    }
 }
