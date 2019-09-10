@@ -6,12 +6,17 @@ namespace App\Http\Controllers;
 
 use App\Repositories\Contracts\IUserRepository;
 use App\Repositories\Contracts\IWorkerRepository;
+use App\Repositories\Contracts\IEmployerRepository;
 use App\Utils\Rules;
 use Exception;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
+    /**
+     * @var IEmployerRepository
+     */
+    private $employerRepository;
     /**
      * @var IWorkerRepository
      */
@@ -25,9 +30,11 @@ class UserController extends Controller
      * UserController constructor.
      * @param IWorkerRepository $workerRepository
      * @param IUserRepository $userRepository
+     * @param IEmployerRepository $employerRepository
      */
-    public function __construct(IWorkerRepository $workerRepository, IUserRepository $userRepository)
+    public function __construct(IEmployerRepository $employerRepository, IWorkerRepository $workerRepository, IUserRepository $userRepository)
     {
+        $this->employerRepository = $employerRepository;
         $this->workerRepository = $workerRepository;
         $this->userRepository = $userRepository;
     }

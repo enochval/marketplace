@@ -154,12 +154,16 @@ class UserRepository implements IUserRepository
 
         if ($this->getUser()->hasRole(Role::WORKER)) {
             // return worker's full details
+            return $this->getFullDetails();
         } elseif ($this->getUser()->hasRole(Role::EMPLOYER)) {
             // return employer's full details
+            return $this->getFullDetails();
         } elseif ($this->getUser()->hasRole(Role::AGENT)) {
             // return agent's full details
+            return $this->getFullDetails();
         } elseif ($this->getUser()->hasRole(Role::ADMIN)) {
             // return agent's full details
+            return $this->getFullDetails();
         }
     }
 
