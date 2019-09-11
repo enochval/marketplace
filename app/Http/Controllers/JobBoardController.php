@@ -56,7 +56,7 @@ class UserController extends Controller
   public function getSingleJob($id)
   {
     try {
-      $job = $this->jobRepo->getJob($id);
+      $job = $this->jobRepo->getSingleJob($id);
       return [
         'payload' => $job
       ];

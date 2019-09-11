@@ -31,6 +31,7 @@ class CreateJobBoardsTables extends Migration
             $table->boolean('is_published')->default(false);
             $table->boolean('is_active')->default(false);
             $table->boolean('is_running')->default(false);
+            $table->boolean('is_completed')->default(false);            
             $table->timestamps();
         });
     }

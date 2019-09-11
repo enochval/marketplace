@@ -23,12 +23,16 @@ $router->group(['prefix' => 'api/v1'], function () use($router) {
 
     // protected routes group
     $router->group(['middleware' => 'auth:api'], function () use($router) {
+            
+            //EMPLOYER
             $router->post('employer-update-profile', 'UserController@updateEmployer');
             $router->get('employer-edit-profile', 'UserController@editEmployer');
 
+
+            //JOBS
             $router->get('jobs', 'JobBoardController@index');
             $router->post('post-job', 'JobBoardController@postJob');
-            $router->get('jobs/{job_id}', 'JobBoardController@getSingleJob');
+            $router->get('jobs/{id}', 'JobBoardController@getSingleJob');
         });
 
     // $router->post('employer-update-profile', 'UserController@updateEmployer');
