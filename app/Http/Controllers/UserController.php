@@ -22,11 +22,17 @@ class UserController extends Controller
     private $userRepository;
 
     /**
+     * @var IUserRepository
+     */
+    private $employerRepository;
+
+    /**
      * UserController constructor.
      * @param IWorkerRepository $workerRepository
      * @param IUserRepository $userRepository
+     * @param IEmployerRepository $employerRepository
      */
-    public function __construct(IWorkerRepository $workerRepository, IUserRepository $userRepository)
+    public function __construct(IWorkerRepository $workerRepository, IUserRepository $userRepository, IEmployerRepository $employerRepository)
     {
         $this->middleware('auth:api', ['except' => [
             'paymentCallback'
@@ -38,6 +44,7 @@ class UserController extends Controller
 
         $this->workerRepository = $workerRepository;
         $this->userRepository = $userRepository;
+        $this->employerRepository = $employerRepository;
     }
 
     /**

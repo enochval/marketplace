@@ -18,6 +18,8 @@ class JobBoardController extends Controller
 
     public function __construct(IJobRepository $jobRepository)
     {
+        $this->middleware('auth:api');
+        
         $this->jobRepository = $jobRepository;
     }
 
