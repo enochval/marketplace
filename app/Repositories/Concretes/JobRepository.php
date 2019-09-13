@@ -96,6 +96,23 @@ class JobRepository implements IJobRepository
         }
         
     }
+
+    public function getFileNameToStore($request)
+    {
+        //Get full filename
+        $filenameWithExt = $request->file('avatar')->getClientOriginalName();
+
+        //Extract filename only
+        $filenameWithoutExt = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+
+        //Extract extenstion only
+        $extension = $request->file('avatar')->getClientOriginalExtension();
+
+        //Combine again with timestamp in the middle to differentiate files with same filename.
+        $filenameToStore = $filenameWithoutExt . '_' . time() . '.' . $extension;
+
+        return $filenameToStore;
+    }
     
 }
 

@@ -31,4 +31,19 @@ $router->group(['prefix' => 'api/v1'], function () use($router) {
     $router->post('verify-bvn', 'UserController@bvnVerification');
     $router->get('bvn-analysis', 'UserController@getBvnAnalysis');
     $router->get('callback', 'UserController@paymentCallback');
+
+    // protected routes group
+    $router->group(['middleware' => 'auth:api'], function () use ($router) {
+
+        //EMPLOYER
+        $router->post('employer-update-profile', 'UserController@updateEmployer');
+        $router->get('employer-edit-profile', 'UserController@editEmployer');
+
+
+        //JOBS
+        $router->post('post-job', 'JobBoardController@postJob');
+        $router->get('jobs', 'JobBoardController@getJobs');
+        $router->get('jobs/{id}', 'JobBoardController@getSingleJob');
+    });
+
 });
