@@ -45,6 +45,7 @@ class UserController extends Controller
      *     path="/profile",
      *     operationId="profile",
      *     tags={"User Management"},
+     *     security={{"authorization_token": {}}},
      *     summary="Update user's profile",
      *     description="",
      *     @OA\RequestBody(
@@ -135,6 +136,7 @@ class UserController extends Controller
      *     path="/work-history",
      *     operationId="workHistory",
      *     tags={"User Management"},
+     *     security={{"authorization_token": {}}},
      *     summary="Create work history for workers",
      *     description="Can only be performed by a worker user",
      *     @OA\RequestBody(
@@ -200,6 +202,7 @@ class UserController extends Controller
      *     path="/worker-skill",
      *     operationId="WorkerSkill",
      *     tags={"User Management"},
+     *     security={{"authorization_token": {}}},
      *     summary="Create worker skills",
      *     description="Can only be perform by a worker user",
      *     @OA\RequestBody(
@@ -258,6 +261,7 @@ class UserController extends Controller
      *     path="/verify-bvn",
      *     operationId="bvnVerification",
      *     tags={"User Management"},
+     *     security={{"authorization_token": {}}},
      *     summary="Verify user's bvn",
      *     description="",
      *     @OA\RequestBody(
@@ -330,6 +334,7 @@ class UserController extends Controller
      *     path="/bvn-analysis",
      *     operationId="bvnAnalysis",
      *     tags={"User Management"},
+     *     security={{"authorization_token": {}}},
      *     summary="Get bvn analysis and score",
      *     description="",
      *     @OA\Response(
