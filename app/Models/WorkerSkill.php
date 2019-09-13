@@ -11,6 +11,6 @@ class WorkerSkill extends BaseModel
     ];
 
     protected $hidden = [
-        'id', 'updated_at'
+        'id', 'updated_at', 'user_id', 'created_at'
     ];
 }

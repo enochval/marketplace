@@ -15,4 +15,8 @@ class Role extends EntrustRole
     protected $fillable = [
         'name', 'display_name', 'description'
     ];
+
+    protected $hidden = [
+        'id', 'description', 'created_at', 'updated_at', 'pivot'
+    ];
 }

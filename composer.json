@@ -23,7 +23,8 @@
         "proshore/entrust-lumen": "1.0.2",
         "tymon/jwt-auth": "dev-develop#f72b8eb as 1.0.0-rc.3.2",
         "vlucas/phpdotenv": "^3.3",
-        "ext-json": "*"
+        "ext-json": "*",
+        "ext-openssl": "*"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",

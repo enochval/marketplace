@@ -37,8 +37,9 @@ class Role
 
 		if ($this->auth->guest() || !$request->user()->hasRole($roles)) {
 			return response()->json([
-			    'Access Denied'
-            ]);
+			    'status' => false,
+                'error' => 'Access Denied'
+            ], 401);
 		}
 
 		return $next($request);

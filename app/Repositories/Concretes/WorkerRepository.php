@@ -3,8 +3,6 @@
 
 namespace App\Repositories\Concretes;
 
-use App\Jobs\SendWelcomeEmailJob;
-use App\Jobs\UpdateLastLoginJob;
 use App\Models\Role;
 use App\Models\User;
 use App\Jobs\SendVerificationEmailJob;
@@ -12,7 +10,6 @@ use App\Models\UsersVerification;
 use App\Repositories\Contracts\IWorkerRepository;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class WorkerRepository implements IWorkerRepository
 {
@@ -111,7 +108,7 @@ class WorkerRepository implements IWorkerRepository
 
     public function getFullDetails(): User
     {
-        return User::with(['profile', 'lastLogin'])->find($this->worker->id);
+        return User::with(['profile', 'workHistory', 'skill', 'roles', 'lastLogin'])->find($this->getWorker()->id);
     }
 
     public function isConfirmed(): bool
@@ -152,6 +149,8 @@ class WorkerRepository implements IWorkerRepository
             'end_date' => $params['end_date'],
         ]);
 
+        $this->updateWorkHistoryStatus();
+
         return $this->getFullDetails();
     }
 
@@ -159,11 +158,30 @@ class WorkerRepository implements IWorkerRepository
     {
         $this->setWorker($user_id);
 
-        $this->getWorker()->workerSkill()->create([
+        $this->getWorker()->skill()->updateOrCreate(
+            [ 'user_id' => $this->getWorker()->id ],
+            [
             'names' => json_encode($params['names']),
             'category_id' => $params['category_id']
-        ]);
+            ]
+        );
+
+        $this->updateWorkerSkillsStatus();
 
         return $this->getFullDetails();
+    }
+
+    public function updateWorkHistoryStatus(): void
+    {
+        $this->getWorker()->update([
+            'work_history_updated' => true
+        ]);
+    }
+
+    public function updateWorkerSkillsStatus(): void
+    {
+        $this->getWorker()->update([
+            'skills_updated' => true
+        ]);
     }
 }

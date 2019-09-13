@@ -21,7 +21,8 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
      * @var array
      */
     protected $fillable = [
-        'phone', 'email', 'password', 'is_active', 'is_premium', 'is_confirmed', 'is_ban', 'is_verified', 'is_bvn_verified', 'profile_updated'
+        'phone', 'email', 'password', 'is_active', 'is_premium', 'is_confirmed', 'is_ban', 'has_paid', 'is_bvn_verified',
+        'profile_updated', 'work_history_updated', 'skills_updated'
     ];
 
     /**
@@ -76,8 +77,18 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
         return $this->hasMany(WorkHistory::class);
     }
 
-    public function workerSkill()
+    public function skill()
     {
         return $this->hasOne(WorkerSkill::class);
+    }
+
+    public function transaction()
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    public function bvnAnalysis()
+    {
+        return $this->hasOne(BvnAnalysis::class);
     }
 }

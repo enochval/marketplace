@@ -34,7 +34,7 @@ class Rules
         'UPDATE_PROFILE' => [
             'first_name' => 'required|string',
             'last_name' => 'required|string',
-            'avatar' => 'required',
+            'avatar' => 'required|string',
             'gender' => 'required|string',
             'date_of_birth' => 'required|string',
             'address' => 'required|string',
@@ -56,17 +56,9 @@ class Rules
         ],
 
         'BVN_VERIFICATION' => [
-            'bvn' => 'required'
-        ],
-
-        'POST_JOB' => [
-            'title' => 'required|string',
-            'description' => 'required|string',
-            'amount' => 'required|numeric',
-            'address' => 'required|string',
-            'city' => 'required|string',
-            'state' => 'required|string',
-        ],
+            'bvn' => 'required|digits:11',
+            'callback_url' => 'required|active_url'
+        ]
     ];
 
     public static function get($rule)

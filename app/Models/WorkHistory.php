@@ -11,6 +11,6 @@ class WorkHistory extends BaseModel
     ];
 
     protected $hidden = [
-        'id', 'updated_at', 'created_at'
+        'id', 'updated_at', 'created_at', 'user_id'
     ];
 }

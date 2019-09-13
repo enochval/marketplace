@@ -12,6 +12,11 @@ class Paystack
     private $base_uri = 'https://api.paystack.co';
     private $client;
 
+    const
+        KOBO = 100,
+        APPROVED = 'approved',
+        SUCCESSFUL = 'successful';
+
     public function __construct()
     {
         $this->setClient();
@@ -60,16 +65,27 @@ class Paystack
     }
 
     /**
-     * @param array $params
+     * @param $ref
+     * @param $amount
+     * @param $email
      * @return mixed
      * @throws Exception
      */
-    public function initialize(array $params)
+    public function initialize($ref, $amount, $email)
     {
         $url_segment = '/transaction/initialize';
 
+        $callback_url = url('api/v1/callback');
+
+        $params = [
+            'email' => $email,
+            'reference' => $ref,
+            'amount' => $this->amountFormat($amount),
+            'callback_url' => $callback_url
+        ];
+
         try {
-            $response = $this->getClient()->post($url_segment, $params);
+            $response = $this->getClient()->post($url_segment, ['json' => $params]);
 
             return $this->prettyResponse($response);
         } catch (ClientException $e) {
@@ -83,7 +99,7 @@ class Paystack
      * @return mixed
      * @throws Exception
      */
-    public function verifyTransaction(string $transaction_reference)
+    public function verify(string $transaction_reference)
     {
         $url_segment = '/transaction/verify/'.$transaction_reference;
 
@@ -126,6 +142,25 @@ class Paystack
     private function errorMessage($err_response): string
     {
         ['message' => $message] = json_decode($err_response->getResponse()->getBody()->getContents(), true);
-        return $message;
+        return $message ?? $err_response->getMessage();
+    }
+
+    private function amountFormat($amount)
+    {
+        return intval($amount) * self::KOBO;
+    }
+
+    public function genTranxRef()
+    {
+        return TransRef::getHashedToken();
+    }
+
+    public function wasSuccessful($status_value)
+    {
+        $status = strtolower($status_value);
+        if ( $status === self::SUCCESSFUL || self::APPROVED) {
+            return true;
+        }
+        return false;
     }
 }

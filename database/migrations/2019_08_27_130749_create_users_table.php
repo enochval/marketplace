@@ -22,9 +22,11 @@ class CreateUsersTable extends Migration
             $table->boolean('is_premium')->default(false); // This is for premium membership
             $table->boolean('is_confirmed')->default(false); // This will be for email confirmation
             $table->boolean('is_ban')->default(false); // This is to ban a user from using the system
-            $table->boolean('is_verified')->default(false); // This is to check if a user has paid the one off fee
+            $table->boolean('has_paid')->default(false); // This is to check if a user has paid the one off fee
             $table->boolean('is_bvn_verified')->default(false);
-            $table->boolean('profile_updated')->default(false); // This is to check if the profile is updated
+            $table->boolean('profile_updated')->default(false); // This is to check if the user's basic profile is updated
+            $table->boolean('work_history_updated')->default(false); // This is to check if the work history for worker is updated
+            $table->boolean('skills_updated')->default(false); // This is to check if the skills for worker is updated
             $table->softDeletes();
             $table->timestamps();
         });
