@@ -12,7 +12,10 @@
 */
 
 $router->get('/', function () use ($router) {
-    return $router->app->version();
+    return response()->json([
+        "message" => "Welcome to Timbala marketplace APIs",
+        "base_url" => url('/')."api/v1/"
+    ]);
 });
 
 $router->group(['prefix' => 'api/v1'], function () use($router) {
@@ -20,4 +23,12 @@ $router->group(['prefix' => 'api/v1'], function () use($router) {
     $router->post('employer-registration', 'AuthController@registerEmployer');
     $router->post('confirm-email', 'AuthController@confirmEmail');
     $router->post('authenticate', 'AuthController@authenticate');
+
+    $router->post('profile', 'UserController@profile');
+    $router->post('work-history', 'UserController@workHistory');
+    $router->post('worker-skill', 'UserController@workerSkills');
+
+    $router->post('verify-bvn', 'UserController@bvnVerification');
+    $router->get('bvn-analysis', 'UserController@getBvnAnalysis');
+    $router->get('callback', 'UserController@paymentCallback');
 });

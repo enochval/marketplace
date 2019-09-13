@@ -34,7 +34,7 @@ class Rules
         'UPDATE_PROFILE' => [
             'first_name' => 'required|string',
             'last_name' => 'required|string',
-            'avatar' => 'required',
+            'avatar' => 'required|string',
             'gender' => 'required|string',
             'date_of_birth' => 'required|string',
             'address' => 'required|string',
@@ -56,7 +56,8 @@ class Rules
         ],
 
         'BVN_VERIFICATION' => [
-            'bvn' => 'required'
+            'bvn' => 'required|digits:11',
+            'callback_url' => 'required|active_url'
         ]
     ];
 
