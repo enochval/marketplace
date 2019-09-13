@@ -21,6 +21,7 @@ class UsersTableSeeder extends Seeder
             'is_active' => true,
             'is_confirmed' => true,
         ]);
+
         $super_admin_user->profile()->create([
             'first_name' => 'Super',
             'last_name' => 'Admin'
@@ -47,6 +48,7 @@ class UsersTableSeeder extends Seeder
             'is_active' => true,
             'is_confirmed' => true,
         ]);
+
         $agent_user->profile()->create([
             'first_name' => 'Agent',
             'last_name' => 'Timbala'
@@ -60,6 +62,7 @@ class UsersTableSeeder extends Seeder
             'is_active' => true,
             'is_confirmed' => true,
         ]);
+        
         $employer_user->profile()->create([
             'first_name' => 'Employer',
             'last_name' => 'Timbala'
@@ -73,6 +76,7 @@ class UsersTableSeeder extends Seeder
             'is_active' => true,
             'is_confirmed' => true,
         ]);
+
         $worker_user->profile()->create([
             'first_name' => 'Worker',
             'last_name' => 'Timbala'

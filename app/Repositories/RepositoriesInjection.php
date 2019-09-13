@@ -9,6 +9,8 @@ use App\Repositories\Concretes\EmployerRepository;
 use App\Repositories\Contracts\IEmployerRepository;
 use App\Repositories\Concretes\UserRepository;
 use App\Repositories\Contracts\IUserRepository;
+use App\Repositories\Concretes\JobRepository;
+use App\Repositories\Contracts\IJobRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoriesInjection extends ServiceProvider
@@ -28,6 +30,11 @@ class RepositoriesInjection extends ServiceProvider
         $this->app->bind(
             IUserRepository::class,
             UserRepository::class
+        );
+
+        $this->app->bind(
+            IJobRepository::class,
+            JobRepository::class
         );
     }
 }

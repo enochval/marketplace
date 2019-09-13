@@ -20,6 +20,7 @@ class CreateJobBoardsTables extends Migration
             $table->string('title');
             $table->text('description');
             $table->string('duration')->default(0);
+            $table->string('frequency')->default(1);
             $table->string('originating_amount')->default(0);
             $table->string('terminating_amount')->default(0);
             $table->string('images')->nullable();

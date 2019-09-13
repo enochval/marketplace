@@ -57,7 +57,16 @@ class Rules
 
         'BVN_VERIFICATION' => [
             'bvn' => 'required'
-        ]
+        ],
+
+        'POST_JOB' => [
+            'title' => 'required|string',
+            'description' => 'required|string',
+            'amount' => 'required|numeric',
+            'address' => 'required|string',
+            'city' => 'required|string',
+            'state' => 'required|string',
+        ],
     ];
 
     public static function get($rule)

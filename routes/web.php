@@ -30,8 +30,8 @@ $router->group(['prefix' => 'api/v1'], function () use($router) {
 
 
             //JOBS
-            $router->get('jobs', 'JobBoardController@index');
             $router->post('post-job', 'JobBoardController@postJob');
+            $router->get('jobs', 'JobBoardController@getJobs');
             $router->get('jobs/{id}', 'JobBoardController@getSingleJob');
         });
 
