@@ -14,77 +14,102 @@ use phpDocumentor\Reflection\Types\Object_;
 
 class JobRepository implements IJobRepository
 {
-    
-    private $employer;
+
+    private $user;
     private $job;
-    
-    public function getEmployer()
+
+    /**
+     * @return mixed
+     */
+    public function getUser()
     {
-        return $this->employer;
+        return $this->user;
     }
 
-    
-    public function setEmployer($employer_id): void
+    /**
+     * @param $user_id
+     */
+    public function setUser($user_id): void
     {
-        $this->employer = User::find($employer_id);
+        $this->user = User::find($user_id);
     }
 
-    
-    public function getJobs()
+    /**
+     * @param int $user_id
+     * @param array $params
+     * @return void
+     * @throws Exception
+     */
+    public function createJob(int $user_id, array $params): void
     {
-        $jobs = JobBoard::orderBy('id', 'desc')->paginate(10);
-        return [
-            'payload' => $jobs
-        ];
-    }
+        $this->setUser($user_id);
 
-    public function postJob(int $employer_id, array $params)
-    {
-        try {
-            
-            [
-                'title' => $title,
-                'description' => $description,
-                'duration' => $duration,
-                'frequency' => $frequency,
-                'amount' => $amount,
-                'address' => $address,
-                'city' => $city,
-                'state' => $state,
-            ] = $params;
-
-            
-            // Persist data
-            $job = JobBoard::create([
-                'employer_id' => $employer_id,
-                'title' => $title,
-                'description' => $description,
-                'duration' => $duration,
-                'frequency' => $frequency,
-                'originating_amount' => $amount,
-                'address' => $address,
-                'city' => $city,
-                'state' => $state,
-            ]);
-
-            return [
-                'payload' => $job,
-            ];
-
-        } catch(Exception $e) {
-            report($e);
-
-            $job->delete();
-
-            // Return a custom error message back....
-            throw new Exception("Unable to create job post, please try again");
+        if (!$this->hasPaid($this->getUser())) {
+            if ($this->hasUsedFreemiumSlot($user_id)) {
+                throw new Exception("You have used up your Freemium slot! Become a premium subscriber today.");
+            }
         }
+
+        $job = JobBoard::create([
+            'employer_id' => $user_id,
+            'title' => $params['title'],
+            'description' => $params['description'],
+            'duration' => $params['duration'],
+            'frequency' => $params['frequency'],
+            'originating_amount' => $params['amount'],
+            'supporting_images' => json_encode($params['images']),
+            'address' => $params['address'],
+            'city' => $params['city'],
+            'state' => $params['state']
+        ]);
+
+        if ($job) {
+            $this->updateSubmitStatus($job);
+        }
+
+        $job->delete();
+
+        throw new Exception("Something went wrong, please try again!");
     }
 
-    
+    public function updateSubmitStatus(JobBoard $jobBoard): void
+    {
+        $jobBoard->update([
+            'is_submitted' => true
+        ]);
+    }
+
+    public function hasPaid(User $user): bool
+    {
+        return $user->has_paid ?? false;
+    }
+
+    public function hasUsedFreemiumSlot($employer_id): bool
+    {
+        if (!$date_of_last_post = $this->getDateOfLastPost($employer_id)) {
+            return false;
+        }
+        return $date_of_last_post->addDays(30)->greaterThan(Carbon::now()) ?? false;
+    }
+
+    public function getDateOfLastPost($employer_id)
+    {
+        if (!$last_job = JobBoard::where('employer_id', $employer_id)->get()->last()) {
+            return null;
+        }
+        return $last_job->created_at;
+    }
+
+    public function myJobs($user_id)
+    {
+        // return with pitches for
+        return JobBoard::with('hiredWorker')->where('employer_id', $user_id)->get();
+    }
+
+
     public function getSingleJob($id)
     {
-        try{
+        try {
             $jobs = JobBoard::where('id', $id)->firstOrFail();
             return [
                 'payload' => $jobs
@@ -94,7 +119,7 @@ class JobRepository implements IJobRepository
 
             throw new Exception("Error getting selected job, please try again");
         }
-        
+
     }
 
     public function getFileNameToStore($request)
@@ -113,6 +138,14 @@ class JobRepository implements IJobRepository
 
         return $filenameToStore;
     }
-    
+
+    public function getJobs()
+    {
+        $jobs = JobBoard::orderBy('id', 'desc')->paginate(10);
+        return [
+            'payload' => $jobs
+        ];
+    }
+
 }
 

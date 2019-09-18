@@ -58,6 +58,10 @@ class Rules
         'BVN_VERIFICATION' => [
             'bvn' => 'required|digits:11',
             'callback_url' => 'required|active_url'
+        ],
+
+        'CREATE_JOB' => [
+
         ]
     ];
 

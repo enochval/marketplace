@@ -19,7 +19,7 @@ class JobBoardController extends Controller
     public function __construct(IJobRepository $jobRepository)
     {
         $this->middleware('auth:api');
-        
+
         $this->jobRepository = $jobRepository;
     }
 
@@ -33,21 +33,17 @@ class JobBoardController extends Controller
         }
     }
 
-    public function postJob() 
+    public function createJob()
     {
-        
-        $payload = request()->all();
-
-        $validator = Validator::make($payload, Rules::get('POST_JOB'));
+        $validator = Validator::make(request()->all(), Rules::get('CREATE_JOB'));
         if ($validator->fails()) {
             return $this->validationErrors($validator->getMessageBag()->all());
         }
+
         try {
-            $employer_id = auth()->user()->id;
-            $job = $this->jobRepository->postJob($employer_id, $payload);
-            return $this->withData($job);
-            // return $this->success("Job post creation successful!");
-        } catch(Excection $e) {
+            $this->jobRepository->createJob(auth()->id(), request()->all());
+            return $this->success("Job created successfully");
+        } catch(Exception $e) {
             return $this->error($e->getMessage());
         }
     }

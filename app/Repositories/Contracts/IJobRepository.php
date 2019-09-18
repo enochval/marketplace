@@ -6,7 +6,7 @@ interface IJobRepository
 {
   public function getJobs();
 
-  public function postJob(int $employer_id, array $params);
+  public function createJob(int $employer_id, array $params);
 
   public function getSingleJob($param);
 }
