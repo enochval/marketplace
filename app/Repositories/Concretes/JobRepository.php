@@ -3,6 +3,7 @@
 
 namespace App\Repositories\Concretes;
 
+use App\Models\GeneralSetting;
 use Exception;
 use Carbon\Carbon;
 use App\Models\User;
@@ -44,32 +45,92 @@ class JobRepository implements IJobRepository
     {
         $this->setUser($user_id);
 
+        ['number_of_resource' => $no_of_resource] = $params;
+
         if (!$this->hasPaid($this->getUser())) {
-            if ($this->hasUsedFreemiumSlot($user_id)) {
-                throw new Exception("You have used up your Freemium slot! Become a premium subscriber today.");
+            if ($this->exceedFreemiumResource($no_of_resource)) {
+                throw new Exception("You have exceed the number of resource as a Freemium subscriber! Become a premium subscriber today.");
             }
         }
 
-        $job = JobBoard::create([
-            'employer_id' => $user_id,
+        try {
+            $job = JobBoard::create([
+                'employer_id' => $user_id,
+                'title' => $params['title'],
+                'description' => $params['description'],
+                'duration' => $params['duration'],
+                'frequency' => $params['frequency'],
+                'amount' => $params['amount'],
+                'number_of_resource' => $no_of_resource,
+                'supporting_images' => json_encode($params['images']),
+                'address' => $params['address'],
+                'city' => $params['city'],
+                'state' => $params['state']
+            ]);
+
+            $this->updateSubmitStatus($job);
+        } catch (Exception $e) {
+
+            $job->delete();
+
+            throw new Exception("Something went wrong, please try again!");
+        }
+    }
+
+    /**
+     * @param int $user_id
+     * @param int $job_id
+     * @param array $params
+     * @return JobBoard
+     * @throws Exception
+     */
+    public function updateJobPost(int $user_id, int $job_id, array $params): JobBoard
+    {
+        $this->setUser($user_id);
+        $job_post = $this->retrieveEmployerJobPost($user_id, $job_id);
+
+        ['number_of_resource' => $no_of_resource] = $params;
+
+        if (!$this->hasPaid($this->getUser())) {
+            if ($this->exceedFreemiumResource($no_of_resource)) {
+                throw new Exception("You have exceed the number of resource as a Freemium subscriber! Become a premium subscriber today.");
+            }
+        }
+
+        if ($this->isApproved($job_post)) {
+            $this->unApproveJob($job_post);
+        }
+
+        $job_post->update([
             'title' => $params['title'],
             'description' => $params['description'],
             'duration' => $params['duration'],
             'frequency' => $params['frequency'],
-            'originating_amount' => $params['amount'],
+            'amount' => $params['amount'],
+            'number_of_resource' => $no_of_resource,
             'supporting_images' => json_encode($params['images']),
             'address' => $params['address'],
             'city' => $params['city'],
             'state' => $params['state']
         ]);
 
-        if ($job) {
-            $this->updateSubmitStatus($job);
-        }
+        return $job_post->refresh();
+    }
 
-        $job->delete();
+    public function completeJob($user_id, $job_id): JobBoard
+    {
+        $job_post = $this->retrieveEmployerJobPost($user_id, $job_id);
 
-        throw new Exception("Something went wrong, please try again!");
+        $job_post->update([
+            'is_completed' => true
+        ]);
+
+        return $job_post->refresh();
+    }
+
+    public function reviewWorker(int $job_id, int $employer_id, int $worker_id, array $params)
+    {
+
     }
 
     public function updateSubmitStatus(JobBoard $jobBoard): void
@@ -84,20 +145,46 @@ class JobRepository implements IJobRepository
         return $user->has_paid ?? false;
     }
 
-    public function hasUsedFreemiumSlot($employer_id): bool
+    /**
+     * @param $no_of_resource
+     * @return bool
+     * @throws Exception
+     */
+    public function exceedFreemiumResource($no_of_resource): bool
     {
-        if (!$date_of_last_post = $this->getDateOfLastPost($employer_id)) {
-            return false;
-        }
-        return $date_of_last_post->addDays(30)->greaterThan(Carbon::now()) ?? false;
+        return ($no_of_resource > $this->getFreeEmployerNoOfResource()) ?? false;
     }
 
-    public function getDateOfLastPost($employer_id)
+    /**
+     * @param $user_id
+     * @param $job_id
+     * @return mixed
+     * @throws Exception
+     */
+    public function retrieveEmployerJobPost($user_id, $job_id)
     {
-        if (!$last_job = JobBoard::where('employer_id', $employer_id)->get()->last()) {
-            return null;
-        }
-        return $last_job->created_at;
+        if(!$job_post = JobBoard::where('employer_id', $user_id)
+            ->where('id', $job_id)->first())
+            throw new Exception('Job post not found!');
+
+        return $job_post;
+    }
+
+    public function isSubmitted(JobBoard $jobBoard)
+    {
+        return $jobBoard->is_submitted ?? false;
+    }
+
+    public function isApproved(JobBoard $jobBoard)
+    {
+        return $jobBoard->is_approved ?? false;
+    }
+
+    public function unApproveJob(JobBoard $jobBoard): void
+    {
+        $jobBoard->update([
+            'is_approved' => false
+        ]);
     }
 
     public function myJobs($user_id)
@@ -145,6 +232,18 @@ class JobRepository implements IJobRepository
         return [
             'payload' => $jobs
         ];
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getFreeEmployerNoOfResource(): int
+    {
+        if (!$general_settings = GeneralSetting::find(1)) {
+            throw new Exception("Settings not available! Contact the admin.");
+        }
+
+        return $general_settings->no_of_free_resource;
     }
 
 }

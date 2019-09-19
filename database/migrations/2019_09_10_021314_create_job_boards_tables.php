@@ -16,13 +16,12 @@ class CreateJobBoardsTables extends Migration
         Schema::create('job_boards', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('employer_id')->unsigned();
-            $table->integer('hired_worker_id')->nullable()->unsigned();
             $table->string('title');
             $table->text('description');
             $table->string('duration')->nullable();
             $table->string('frequency')->nullable();
-            $table->string('originating_amount')->default(0);
-            $table->string('terminating_amount')->default(0);
+            $table->string('amount')->default(0);
+            $table->integer('number_of_resource')->default(0);
             $table->longText('supporting_images')->nullable();
             $table->string('address')->nullable();
             $table->string('city')->nullable();
