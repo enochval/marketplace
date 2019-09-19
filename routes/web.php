@@ -24,7 +24,7 @@ $router->group(['prefix' => 'api/v1'], function () use($router) {
     $router->post('confirm-email', 'AuthController@confirmEmail');
     $router->post('authenticate', 'AuthController@authenticate');
 
-    $router->post('profile', 'UserController@profile');
+    $router->patch('profile', 'UserController@profile');
     $router->post('work-history', 'UserController@workHistory');
     $router->post('worker-skill', 'UserController@workerSkills');
 

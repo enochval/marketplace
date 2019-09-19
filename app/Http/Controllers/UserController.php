@@ -41,7 +41,7 @@ class UserController extends Controller
     }
 
     /**
-     * @OA\Post(
+     * @OA\Patch(
      *     path="/profile",
      *     operationId="profile",
      *     tags={"User Management"},
