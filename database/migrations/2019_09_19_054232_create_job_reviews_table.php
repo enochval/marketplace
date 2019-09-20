@@ -15,8 +15,8 @@ class CreateJobReviewsTable extends Migration
     {
         Schema::create('job_reviews', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('employer_id');
-            $table->integer('worker_id');
+            $table->integer('reviewer_id');
+            $table->integer('reviewee_id');
             $table->integer('job_id');
             $table->integer('no_of_stars');
             $table->text('remark');

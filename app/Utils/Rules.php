@@ -61,7 +61,25 @@ class Rules
         ],
 
         'CREATE_JOB' => [
+            'title' => 'required',
+            'description' => 'required',
+            'duration' => 'required|numeric',
+            'frequency' => 'required',
+            'amount' => 'required|numeric',
+            'no_of_resource' => 'required',
+            'supporting_images' => 'required|array',
+            'address' => 'required',
+            'city' => 'required',
+            'state' => 'required'
+        ],
 
+        'BID' => [
+            'amount' => 'required|numeric'
+        ],
+
+        'JOB_REVIEW' => [
+            'no_of_stars' => 'required|numeric|max:5',
+            'remark' => 'required|string'
         ]
     ];
 

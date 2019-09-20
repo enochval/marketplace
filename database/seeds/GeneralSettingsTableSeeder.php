@@ -13,7 +13,9 @@ class GeneralSettingsTableSeeder extends Seeder
     public function run()
     {
         GeneralSetting::create([
-            'verification_fee' => 1000
+            'verification_fee' => 1000,
+            'no_of_employer_free_resource' => 1,
+            'no_of_worker_free_trial' => 2
         ]);
     }
 }

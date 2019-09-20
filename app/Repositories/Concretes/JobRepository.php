@@ -3,15 +3,15 @@
 
 namespace App\Repositories\Concretes;
 
+use App\Jobs\SendHireNotification;
 use App\Models\GeneralSetting;
+use App\Models\JobPitch;
+use App\Models\JobReview;
+use App\Models\Role;
 use Exception;
-use Carbon\Carbon;
 use App\Models\User;
 use App\Models\JobBoard;
-use App\Jobs\SendJobPostEmailJob;
 use App\Repositories\Contracts\IJobRepository;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use phpDocumentor\Reflection\Types\Object_;
 
 class JobRepository implements IJobRepository
 {
@@ -45,7 +45,7 @@ class JobRepository implements IJobRepository
     {
         $this->setUser($user_id);
 
-        ['number_of_resource' => $no_of_resource] = $params;
+        ['no_of_resource' => $no_of_resource] = $params;
 
         if (!$this->hasPaid($this->getUser())) {
             if ($this->exceedFreemiumResource($no_of_resource)) {
@@ -53,28 +53,21 @@ class JobRepository implements IJobRepository
             }
         }
 
-        try {
-            $job = JobBoard::create([
-                'employer_id' => $user_id,
-                'title' => $params['title'],
-                'description' => $params['description'],
-                'duration' => $params['duration'],
-                'frequency' => $params['frequency'],
-                'amount' => $params['amount'],
-                'number_of_resource' => $no_of_resource,
-                'supporting_images' => json_encode($params['images']),
-                'address' => $params['address'],
-                'city' => $params['city'],
-                'state' => $params['state']
-            ]);
+        $job = JobBoard::create([
+            'employer_id' => $user_id,
+            'title' => $params['title'],
+            'description' => $params['description'],
+            'duration' => $params['duration'],
+            'frequency' => $params['frequency'],
+            'amount' => $params['amount'],
+            'no_of_resource' => $no_of_resource,
+            'supporting_images' => json_encode($params['supporting_images']),
+            'address' => $params['address'],
+            'city' => $params['city'],
+            'state' => $params['state']
+        ]);
 
-            $this->updateSubmitStatus($job);
-        } catch (Exception $e) {
-
-            $job->delete();
-
-            throw new Exception("Something went wrong, please try again!");
-        }
+        $this->updateSubmitStatus($job);
     }
 
     /**
@@ -87,9 +80,10 @@ class JobRepository implements IJobRepository
     public function updateJobPost(int $user_id, int $job_id, array $params): JobBoard
     {
         $this->setUser($user_id);
+
         $job_post = $this->retrieveEmployerJobPost($user_id, $job_id);
 
-        ['number_of_resource' => $no_of_resource] = $params;
+        ['no_of_resource' => $no_of_resource] = $params;
 
         if (!$this->hasPaid($this->getUser())) {
             if ($this->exceedFreemiumResource($no_of_resource)) {
@@ -98,7 +92,7 @@ class JobRepository implements IJobRepository
         }
 
         if ($this->isApproved($job_post)) {
-            $this->unApproveJob($job_post);
+            $this->unApproveJob($job_id);
         }
 
         $job_post->update([
@@ -107,8 +101,8 @@ class JobRepository implements IJobRepository
             'duration' => $params['duration'],
             'frequency' => $params['frequency'],
             'amount' => $params['amount'],
-            'number_of_resource' => $no_of_resource,
-            'supporting_images' => json_encode($params['images']),
+            'no_of_resource' => $no_of_resource,
+            'supporting_images' => json_encode($params['supporting_images']),
             'address' => $params['address'],
             'city' => $params['city'],
             'state' => $params['state']
@@ -117,6 +111,12 @@ class JobRepository implements IJobRepository
         return $job_post->refresh();
     }
 
+    /**
+     * @param $user_id
+     * @param $job_id
+     * @return JobBoard
+     * @throws Exception
+     */
     public function completeJob($user_id, $job_id): JobBoard
     {
         $job_post = $this->retrieveEmployerJobPost($user_id, $job_id);
@@ -128,9 +128,142 @@ class JobRepository implements IJobRepository
         return $job_post->refresh();
     }
 
-    public function reviewWorker(int $job_id, int $employer_id, int $worker_id, array $params)
+    /**
+     * @param int $job_id
+     * @param int $employer_id
+     * @param int $worker_id
+     * @param array $params
+     * @return JobReview
+     * @throws Exception
+     */
+    public function reviewWorker(int $job_id, int $employer_id, int $worker_id, array $params): JobReview
     {
+        if (!$this->isCompleted($job_id))
+            throw new Exception('This job is not completed!');
 
+        if ($this->hasReviewed($job_id, $employer_id, $worker_id)) {
+            throw new Exception('Worker has already been reviewed');
+        }
+
+        $review = JobReview::create([
+            'job_id' => $job_id,
+            'reviewer_id' => $employer_id,
+            'reviewee_id' => $worker_id,
+            'no_of_stars' => $params['no_of_stars'],
+            'remark' => $params['remark']
+        ]);
+
+        return $review;
+    }
+
+    /**
+     * @param int $job_id
+     * @param int $employer_id
+     * @param int $worker_id
+     * @param array $params
+     * @return JobReview
+     * @throws Exception
+     */
+    public function reviewEmployer(int $job_id, int $worker_id, int $employer_id, array $params): JobReview
+    {
+        if (!$this->isCompleted($job_id))
+            throw new Exception('This job is not completed!');
+
+        if ($this->hasReviewed($job_id, $worker_id, $employer_id)) {
+            throw new Exception('Employer has already been reviewed');
+        }
+
+        $review = JobReview::create([
+            'job_id' => $job_id,
+            'reviewer_id' => $worker_id,
+            'reviewee_id' => $employer_id,
+            'no_of_stars' => $params['no_of_stars'],
+            'remark' => $params['remark']
+        ]);
+
+        return $review;
+    }
+
+    public function hasReviewed($job_id, $reviewer_id, $reviewee_id)
+    {
+        if (!$review = JobReview::where('job_id', $job_id)
+            ->where('reviewer_id', $reviewer_id)
+            ->where('reviewee_id', $reviewee_id)
+            ->first()
+        )
+            return false;
+
+        return true;
+    }
+
+    /**
+     * @param $worker_id
+     * @param $job_id
+     * @param $params
+     * @throws Exception
+     */
+    public function bidForJob($worker_id, $job_id, $params)
+    {
+        $this->setUser($worker_id);
+
+        if (!$this->isPremium($this->getUser())) {
+            if ($this->hasExceedFreeTrial($worker_id)) {
+                throw new Exception('You have exceed your freemium subscription! Upgrade to premium!');
+            }
+        }
+
+        if ($this->hasApplied($worker_id, $job_id)) {
+            throw new Exception('You have already applied for this job');
+        }
+
+        JobPitch::create([
+            'job_board_id' => $job_id,
+            'worker_id' => $worker_id,
+            'amount' => $params['amount']
+        ]);
+
+        // don't know what to return here yet
+    }
+
+    /**
+     * @param $job_id
+     * @param $worker_id
+     * @return JobPitch
+     * @throws Exception
+     */
+    public function hireResource($job_id, $worker_id): JobPitch
+    {
+        if (!$job_pitch = JobPitch::where('job_board_id', $job_id)
+            ->where('worker_id', $worker_id)
+            ->first())
+            throw new Exception('Job pitch was not found!');
+
+        // check to see that it hasn't exceeded the no of resource
+        if ($this->hasHiredRequiredResource($job_id))
+            throw new Exception('You cannot hire this resource! you have hired all needed resource for this job.');
+
+        $this->setUser($worker_id);
+
+        if (!$this->isPremium($this->getUser())) {
+            if ($this->hasExceedFreeTrial($worker_id)) {
+                throw new Exception('Worker cannot be hired! Worker has exceed the free trial usage.');
+            }
+        }
+
+        $job_pitch->update([
+            'is_hired' => true
+        ]);
+
+        // Send a mail here to the worker that he has been hired
+        dispatch(new SendHireNotification($this->getUser()));
+
+        $this->updateHiredCount($job_id);
+
+        if ($this->hasHiredRequiredResource($job_id)) {
+            $this->updateRunningStatus($job_id);
+        }
+
+        return $this->getWorkerJobPitch($job_id, $worker_id);
     }
 
     public function updateSubmitStatus(JobBoard $jobBoard): void
@@ -140,9 +273,30 @@ class JobRepository implements IJobRepository
         ]);
     }
 
+    public function isBvnVerified(User $user)
+    {
+        return $user->is_bvn_verified ?? false;
+    }
+
+    /**
+     * @param $job_id
+     * @throws Exception
+     */
+    public function updateRunningStatus($job_id)
+    {
+        $this->getJob($job_id)->update([
+            'is_running' => true
+        ]);
+    }
+
     public function hasPaid(User $user): bool
     {
         return $user->has_paid ?? false;
+    }
+
+    public function isPremium(User $user): bool
+    {
+        return $user->is_premium ?? false;
     }
 
     /**
@@ -163,7 +317,7 @@ class JobRepository implements IJobRepository
      */
     public function retrieveEmployerJobPost($user_id, $job_id)
     {
-        if(!$job_post = JobBoard::where('employer_id', $user_id)
+        if (!$job_post = JobBoard::where('employer_id', $user_id)
             ->where('id', $job_id)->first())
             throw new Exception('Job post not found!');
 
@@ -180,58 +334,95 @@ class JobRepository implements IJobRepository
         return $jobBoard->is_approved ?? false;
     }
 
-    public function unApproveJob(JobBoard $jobBoard): void
+    /**
+     * @param $job_id
+     * @return bool|mixed
+     * @throws Exception
+     */
+    public function isCompleted($job_id)
     {
-        $jobBoard->update([
+        return $this->getJob($job_id)->is_completed ?? false;
+    }
+
+    public function approveJob($job_id): JobBoard
+    {
+        $job = $this->getJob($job_id);
+
+        $job->update([
+            'is_approved' => true
+        ]);
+
+        return $job->refresh();
+    }
+
+    public function unApproveJob($job_id): JobBoard
+    {
+        $job = $this->getJob($job_id);
+
+        $job->update([
             'is_approved' => false
         ]);
+
+        return $job->refresh();
     }
 
-    public function myJobs($user_id)
+    public function getWorkerJobPitch($job_id, $worker_id)
     {
-        // return with pitches for
-        return JobBoard::with('hiredWorker')->where('employer_id', $user_id)->get();
+        return JobPitch::with('worker')
+            ->where('job_board_id', $job_id)
+            ->where('worker_id', $worker_id)
+            ->get();
     }
 
-
-    public function getSingleJob($id)
+    public function getJobPitches($job_id)
     {
-        try {
-            $jobs = JobBoard::where('id', $id)->firstOrFail();
-            return [
-                'payload' => $jobs
-            ];
-        } catch (Exception $e) {
-            report($e);
+        return JobPitch::with('worker')->where('job_board_id', $job_id)->get();
+    }
 
-            throw new Exception("Error getting selected job, please try again");
+    public function myJobs($user_id, $perPage = 15, $orderBy = 'created_at', $sort = 'desc')
+    {
+        $this->setUser($user_id);
+
+        if ($this->getUser()->hasRole(Role::EMPLOYER)) {
+
+            return JobBoard::where('employer_id', $user_id)
+                ->orderBy($orderBy, $sort)
+                ->paginate($perPage);
+
+        } elseif ($this->getUser()->hasRole(Role::WORKER)) {
+
+            return JobPitch::with('job')
+                ->where('worker_id', $user_id)
+                ->orderBy($orderBy, $sort)
+                ->paginate($perPage);
+
         }
 
+        throw new Exception('Unknown User!');
     }
 
-    public function getFileNameToStore($request)
+    /**
+     * @param $job_id
+     * @return mixed
+     * @throws Exception
+     */
+    public function hasHiredRequiredResource($job_id)
     {
-        //Get full filename
-        $filenameWithExt = $request->file('avatar')->getClientOriginalName();
-
-        //Extract filename only
-        $filenameWithoutExt = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-
-        //Extract extenstion only
-        $extension = $request->file('avatar')->getClientOriginalExtension();
-
-        //Combine again with timestamp in the middle to differentiate files with same filename.
-        $filenameToStore = $filenameWithoutExt . '_' . time() . '.' . $extension;
-
-        return $filenameToStore;
+        $job = $this->getJob($job_id);
+        return ($job->no_of_resource == $job->hired_count) ?? false;
     }
 
-    public function getJobs()
+    /**
+     * @param $job_id
+     * @throws Exception
+     */
+    public function updateHiredCount($job_id)
     {
-        $jobs = JobBoard::orderBy('id', 'desc')->paginate(10);
-        return [
-            'payload' => $jobs
-        ];
+        $job = $this->getJob($job_id);
+
+        $job->update([
+            'hired_count' => $job->hired_count + 1
+        ]);
     }
 
     /**
@@ -243,8 +434,82 @@ class JobRepository implements IJobRepository
             throw new Exception("Settings not available! Contact the admin.");
         }
 
-        return $general_settings->no_of_free_resource;
+        return $general_settings->no_of_employer_free_resource;
     }
 
+    /**
+     * @return mixed
+     * @throws Exception
+     */
+    public function getFreeWorkerNoOfJobs()
+    {
+        if (!$general_settings = GeneralSetting::find(1)) {
+            throw new Exception("Settings not available! Contact the admin.");
+        }
+
+        return $general_settings->no_of_worker_free_trial;
+    }
+
+    /**
+     * @param $worker_id
+     * @return bool
+     * @throws Exception
+     */
+    public function hasExceedFreeTrial($worker_id): bool
+    {
+        if (!$job_hired_count = JobPitch::where('worker_id', $worker_id)
+            ->where('is_hired', true)
+            ->get()->count())
+            return false;
+
+        return ($job_hired_count >= $this->getFreeWorkerNoOfJobs()) ?? false;
+    }
+
+    public function hasApplied($worker_id, $job_id)
+    {
+        if (!$job_pitch = JobPitch::where('worker_id', $worker_id)
+            ->where('job_board_id', $job_id)
+            ->first())
+            return false;
+
+        return true;
+    }
+
+    public function jobListing($perPage = 15, $orderBy = 'created_at', $sort = 'desc')
+    {
+        return JobBoard::where('is_submitted', true)
+            ->where('is_approved', true)
+            ->where('is_running', false)
+            ->where('is_completed', false)
+            ->orderBy($orderBy, $sort)
+            ->paginate($perPage);
+    }
+
+    public function allJobs($perPage = 15, $orderBy = 'created_at', $sort = 'desc')
+    {
+        return JobBoard::orderBy($orderBy, $sort)
+            ->paginate($perPage);
+    }
+
+    /**
+     * @param $job_id
+     * @return mixed
+     * @throws Exception
+     */
+    public function getJob($job_id): JobBoard
+    {
+        if (!$job = JobBoard::find($job_id))
+            throw new Exception('Job board not found!');
+
+        return $job;
+    }
+
+    public function jobReviews($job_id, $reviewee_id)
+    {
+        return JobReview::with('reviewer')
+            ->where('job_id', $job_id)
+            ->where('reviewee_id', $reviewee_id)
+            ->get();
+    }
 }
 

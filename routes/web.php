@@ -32,8 +32,28 @@ $router->group(['prefix' => 'api/v1'], function () use($router) {
     $router->get('bvn-analysis', 'UserController@getBvnAnalysis');
     $router->get('callback', 'UserController@paymentCallback');
 
-    $router->post('post-job', 'JobBoardController@postJob');
-    $router->get('jobs', 'JobBoardController@getJobs');
-    $router->get('jobs/{id}', 'JobBoardController@getSingleJob');
+    $router->group(['prefix' => 'job-board'], function () use($router) {
+        $router->post('', 'JobBoardController@createJob');
 
+        $router->get('', 'JobBoardController@myJobs');
+
+        $router->post('{id}/bid', 'JobBoardController@bid');
+
+        $router->patch('{id}/update', 'JobBoardController@updateJob');
+        $router->patch('{id}/hire-worker/{worker_id}', 'JobBoardController@hireWorker');
+        $router->patch('{id}/review-worker/{worker_id}', 'JobBoardController@reviewWorker');
+        $router->patch('{id}/review-employer/{employer_id}', 'JobBoardController@reviewEmployer');
+        $router->patch('{id}/complete', 'JobBoardController@completeJob');
+
+        $router->get('{id}/pitches', 'JobBoardController@getJobPitches');
+        $router->get('{id}/reviews', 'JobBoardController@jobReviews');
+    });
+
+    $router->get('job-listing', 'JobBoardController@jobListing');
+
+    $router->group(['prefix' => 'admin'], function () use ($router) {
+        $router->get('jobs', 'JobBoardController@allJobs');
+        $router->patch('jobs/{id}/approve', 'JobBoardController@approveJob');
+        $router->patch('jobs/{id}/reverse-approval', 'JobBoardController@unApproveJob');
+    });
 });

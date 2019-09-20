@@ -223,6 +223,10 @@ class UserRepository implements IUserRepository
         if ($bvn_status) {
             // Update bvn_verified status
             $this->updateBvnVerificationStatus();
+
+            //update premium status here I guess
+
+
             return ["bvn_verification_status" => "Valid"];
         }
 
@@ -298,6 +302,8 @@ class UserRepository implements IUserRepository
             if ($bvn_status) {
                 // Update bvn_verified status
                 $this->updateBvnVerificationStatus();
+
+                //update premium status here I guess
             }
 
             // I don't know if you should make the user premium here....
@@ -418,5 +424,85 @@ class UserRepository implements IUserRepository
     public function isProfileUpdated(): bool
     {
         return $this->getUser()->profile_updated ?? false;
+    }
+
+//    /**
+//     * @param $params
+//     * @throws Exception
+//     */
+//    public function createUser($params)
+//    {
+//        try {
+//            $user = User::create([
+//                'email' => $params['email'],
+//                'phone' => $params['phone'],
+//                'password' => bcrypt($params['password'])
+//            ]);
+//
+//            $user->profile()->create([
+//                'first_name' => $params['first_name'],
+//                'last_name' => $params['last_name'],
+//            ]);
+//
+//            $user->attachRole($params['role_id']);
+//
+//            $this->createVerificationToken($user);
+//
+//            $this->activate($user);
+//        } catch (Exception $e) {
+//            report($e);
+//
+//            //Delete the user to avoid duplicate entry.
+//            $user->delete();
+//
+//            // Return a custom error message back....
+//            throw new Exception("Unable to create user, please try again");
+//        }
+//    }
+//
+//    public function update($user_id, $params)
+//    {
+//        try {
+//            $user = User::find($user_id);
+//
+//            $user->update([
+//                'email' => $params['email'],
+//                'phone' => $params['phone'],
+//            ]);
+//
+//            $user->profile()->update([
+//                'first_name' => $params['first_name'],
+//                'last_name' => $params['last_name'],
+//            ]);
+//
+//            $user->attachRole($params['role_id']);
+//
+//        } catch (Exception $e) {
+//            report($e);
+//
+//            //Delete the user to avoid duplicate entry.
+//            $user->delete();
+//
+//            // Return a custom error message back....
+//            throw new Exception("Unable to create user, please try again");
+//        }
+//    }
+
+//    public function createVerificationToken(User $user): void
+//    {
+//        $user->verificationToken()->create([
+//            'token' => str_random(40)
+//        ]);
+//    }
+//
+//    public function activate(User $user): bool
+//    {
+//        return $user->update([
+//            'is_active' => true
+//        ]);
+//    }
+    public function allUsers($perPage = 15, $orderBy = 'created_at', $sort = 'desc')
+    {
+        return User::orderBy($orderBy, $sort)->paginate($perPage);
     }
 }

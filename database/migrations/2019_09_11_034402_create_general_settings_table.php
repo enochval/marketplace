@@ -16,6 +16,8 @@ class CreateGeneralSettingsTable extends Migration
         Schema::create('general_settings', function (Blueprint $table) {
             $table->increments('id');
             $table->string('verification_fee')->default(0);
+            $table->integer('no_of_employer_free_resource')->default(0);
+            $table->integer('no_of_worker_free_trial')->default(0);
             $table->timestamps();
         });
     }

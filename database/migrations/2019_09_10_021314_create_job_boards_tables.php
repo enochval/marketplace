@@ -21,8 +21,9 @@ class CreateJobBoardsTables extends Migration
             $table->string('duration')->nullable();
             $table->string('frequency')->nullable();
             $table->string('amount')->default(0);
-            $table->integer('number_of_resource')->default(0);
+            $table->integer('no_of_resource')->default(0);
             $table->longText('supporting_images')->nullable();
+            $table->integer('hired_count')->default(0);
             $table->string('address')->nullable();
             $table->string('city')->nullable();
             $table->string('state')->nullable();

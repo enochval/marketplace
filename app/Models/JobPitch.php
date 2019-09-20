@@ -16,11 +16,13 @@ class JobPitch extends BaseModel
 
     public function worker()
     {
-        return $this->hasOne(User::class, 'worker_id', 'id')->with('profile');
+        return $this->hasOne(User::class, 'id', 'worker_id')
+            ->select(['id', 'email', 'phone'])
+            ->with('profile');
     }
 
-    public function jobBoard()
+    public function job()
     {
-        return $this->hasOne(JobBoard::class, 'job_board_id');
+        return $this->hasOne(JobBoard::class, 'id','job_board_id');
     }
 }
