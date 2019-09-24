@@ -3,6 +3,7 @@
 
 namespace App\Repositories\Concretes;
 
+use App\Jobs\SendChangePasswordEmail;
 use App\Jobs\SendPaymentReceiptEmailJob;
 use App\Jobs\SendWelcomeEmailJob;
 use App\Jobs\StoreBVNAnalysisJob;
@@ -18,6 +19,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 
 class UserRepository implements IUserRepository
 {
@@ -424,6 +426,30 @@ class UserRepository implements IUserRepository
     public function isProfileUpdated(): bool
     {
         return $this->getUser()->profile_updated ?? false;
+    }
+
+    /**
+     * @param int $user_id
+     * @param array $params
+     * @throws Exception
+     */
+    public function updatePassword(int $user_id, array $params): void
+    {
+        $this->setUser($user_id);
+
+        [
+            'current_password' => $current_password,
+            'new_password' => $new_password,
+        ] = $params;
+
+        if (!Hash::check($current_password, $this->getUser()->password))
+            throw new Exception("Current password is incorrect");
+
+        $this->getUser()->update([
+            'password' => app('hash')->make($new_password)
+        ]);
+
+        dispatch(new SendChangePasswordEmail($this->getUser()));
     }
 
 //    /**

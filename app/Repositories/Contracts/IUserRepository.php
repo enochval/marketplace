@@ -18,4 +18,6 @@ interface IUserRepository
     public function callback(string $reference);
 
     public function getBvnAnalysis(int $user_id);
+
+    public function updatePassword(int $user_id, array $params);
 }

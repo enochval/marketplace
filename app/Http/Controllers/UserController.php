@@ -353,4 +353,65 @@ class UserController extends Controller
             return $this->error($e->getMessage());
         }
     }
+
+    /**
+     * @OA\Patch(
+     *     path="/change-password",
+     *     operationId="changePassword",
+     *     tags={"User Management"},
+     *     security={{"authorization_token": {}}},
+     *     summary="Change user's password",
+     *     description="",
+     *     @OA\RequestBody(
+     *       required=true,
+     *       description="Request object",
+     *       @OA\MediaType(
+     *           mediaType="application/json",
+     *           @OA\Schema(
+     *              type="object",
+     *              @OA\Property(
+     *                  property="current_password",
+     *                  description="Current user's password",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="new_password",
+     *                  description="New password",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="new_password_confirmation",
+     *                  description="Confirm New password",
+     *                  type="string",
+     *              )
+     *           )
+     *       )
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns response object",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *          response="422",
+     *          description="Error: Unproccessble Entity. When required parameters were not supplied correctly.",
+     *          @OA\JsonContent()
+     *     )
+     * )
+     */
+    public function changePassword()
+    {
+        $payload = request()->all();
+        $validator = Validator::make($payload, Rules::get('CHANGE_PASSWORD'));
+        if ($validator->fails()) {
+            return $this->validationErrors($validator->getMessageBag()->all());
+        }
+
+        try {
+            $this->userRepository->updatePassword(auth()->id(), request()->all());
+            return $this->success("Password successfully changed!");
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
 }

@@ -43,6 +43,11 @@ class Rules
             'bio' => 'required|string',
         ],
 
+        'CHANGE_PASSWORD' => [
+            'current_password' => 'required',
+            'new_password' => 'required|confirmed|min:8',
+        ],
+
         'WORK_HISTORY' => [
             'employer' => 'required|string',
             'position' => 'required|string',
