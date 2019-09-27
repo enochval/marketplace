@@ -12,12 +12,11 @@ use Exception;
 use App\Models\User;
 use App\Models\JobBoard;
 use App\Repositories\Contracts\IJobRepository;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class JobRepository implements IJobRepository
 {
-
     private $user;
-    private $job;
 
     /**
      * @return mixed
@@ -59,12 +58,13 @@ class JobRepository implements IJobRepository
             'description' => $params['description'],
             'duration' => $params['duration'],
             'frequency' => $params['frequency'],
-            'amount' => $params['amount'],
+            'budget' => $params['budget'],
             'no_of_resource' => $no_of_resource,
-            'supporting_images' => json_encode($params['supporting_images']),
             'address' => $params['address'],
-            'city' => $params['city'],
-            'state' => $params['state']
+            'city_id' => $params['city_id'],
+            'state' => $params['state'],
+            'category_id' => $params['category_id'],
+            'gender' => $params['gender'],
         ]);
 
         $this->updateSubmitStatus($job);
@@ -85,7 +85,7 @@ class JobRepository implements IJobRepository
 
         ['no_of_resource' => $no_of_resource] = $params;
 
-        if (!$this->hasPaid($this->getUser())) {
+        if (!$this->isPremium($this->getUser())) {
             if ($this->exceedFreemiumResource($no_of_resource)) {
                 throw new Exception("You have exceed the number of resource as a Freemium subscriber! Become a premium subscriber today.");
             }
@@ -100,12 +100,13 @@ class JobRepository implements IJobRepository
             'description' => $params['description'],
             'duration' => $params['duration'],
             'frequency' => $params['frequency'],
-            'amount' => $params['amount'],
+            'budget' => $params['budget'],
             'no_of_resource' => $no_of_resource,
-            'supporting_images' => json_encode($params['supporting_images']),
             'address' => $params['address'],
-            'city' => $params['city'],
-            'state' => $params['state']
+            'city_id' => $params['city_id'],
+            'state' => $params['state'],
+            'category_id' => $params['category_id'],
+            'gender' => $params['gender'],
         ]);
 
         return $job_post->refresh();
@@ -219,7 +220,8 @@ class JobRepository implements IJobRepository
         JobPitch::create([
             'job_board_id' => $job_id,
             'worker_id' => $worker_id,
-            'amount' => $params['amount']
+            'amount' => $params['amount'],
+            'proposal' => $params['proposal'],
         ]);
 
         // don't know what to return here yet
@@ -289,11 +291,6 @@ class JobRepository implements IJobRepository
         ]);
     }
 
-    public function hasPaid(User $user): bool
-    {
-        return $user->has_paid ?? false;
-    }
-
     public function isPremium(User $user): bool
     {
         return $user->is_premium ?? false;
@@ -317,7 +314,8 @@ class JobRepository implements IJobRepository
      */
     public function retrieveEmployerJobPost($user_id, $job_id)
     {
-        if (!$job_post = JobBoard::where('employer_id', $user_id)
+        if (!$job_post = JobBoard::with(['city', 'category'])
+            ->where('employer_id', $user_id)
             ->where('id', $job_id)->first())
             throw new Exception('Job post not found!');
 
@@ -379,6 +377,14 @@ class JobRepository implements IJobRepository
         return JobPitch::with('worker')->where('job_board_id', $job_id)->get();
     }
 
+    /**
+     * @param $user_id
+     * @param int $perPage
+     * @param string $orderBy
+     * @param string $sort
+     * @return LengthAwarePaginator
+     * @throws Exception
+     */
     public function myJobs($user_id, $perPage = 15, $orderBy = 'created_at', $sort = 'desc')
     {
         $this->setUser($user_id);
@@ -477,7 +483,8 @@ class JobRepository implements IJobRepository
 
     public function jobListing($perPage = 15, $orderBy = 'created_at', $sort = 'desc')
     {
-        return JobBoard::where('is_submitted', true)
+        return JobBoard::with(['city', 'category', 'hireCheck'])
+            ->where('is_submitted', true)
             ->where('is_approved', true)
             ->where('is_running', false)
             ->where('is_completed', false)
@@ -487,7 +494,8 @@ class JobRepository implements IJobRepository
 
     public function allJobs($perPage = 15, $orderBy = 'created_at', $sort = 'desc')
     {
-        return JobBoard::orderBy($orderBy, $sort)
+        return JobBoard::with(['city', 'category'])
+            ->orderBy($orderBy, $sort)
             ->paginate($perPage);
     }
 
@@ -510,6 +518,72 @@ class JobRepository implements IJobRepository
             ->where('job_id', $job_id)
             ->where('reviewee_id', $reviewee_id)
             ->get();
+    }
+
+    public function getJobsInMyArea($user_id, $perPage = 5, $orderBy = 'created_at', $sort = 'desc')
+    {
+        $this->setUser($user_id);
+
+        $user_city_id = $this->getUser()->profile->city_id;
+
+        return JobBoard::with(['city', 'category', 'hireCheck'])
+            ->where('city_id', $user_city_id)
+            ->orderBy($orderBy, $sort)
+            ->paginate($perPage);
+    }
+
+    public function getTopJobs($perPage = 5)
+    {
+        return JobBoard::with(['city', 'category', 'hireCheck'])
+            ->orderBy('budget', 'asc')
+            ->paginate($perPage);
+    }
+
+    public function getUserNoOfCompletedJobs($user_id)
+    {
+        return JobPitch::with('completedJob')
+            ->where('worker_id', $user_id)
+            ->where('is_hired', true)
+            ->count();
+
+    }
+
+    public function getAverageUserRating($user_id)
+    {
+
+    }
+
+    public function getUserRunningJobs($user_id)
+    {
+        return JobPitch::with('runningJobs')
+            ->where('worker_id', $user_id)
+            ->where('is_hired', true)
+            ->count();
+    }
+
+    public function getTotalAmountEarned($user_id)
+    {
+        $jobs = JobPitch::with('completedJob')
+            ->where('worker_id', $user_id)
+            ->where('is_hired', true)
+            ->get();
+
+        $total_amount = 0;
+
+        foreach ($jobs as $job) {
+            $total_amount += $job->amount;
+        }
+
+        return $total_amount;
+    }
+
+    public function dashboardStat($user_id)
+    {
+        return [
+            'no_of_completed_jobs' => $this->getUserNoOfCompletedJobs($user_id),
+            'amount_earned' => $this->getTotalAmountEarned($user_id),
+            'active_jobs' => $this->getUserRunningJobs($user_id)
+        ];
     }
 }
 

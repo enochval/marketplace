@@ -3,7 +3,9 @@
 
 namespace App\Repositories;
 
+use App\Repositories\Concretes\AdminRepository;
 use App\Repositories\Concretes\WorkerRepository;
+use App\Repositories\Contracts\IAdminRepository;
 use App\Repositories\Contracts\IWorkerRepository;
 use App\Repositories\Concretes\EmployerRepository;
 use App\Repositories\Contracts\IEmployerRepository;
@@ -35,6 +37,11 @@ class RepositoriesInjection extends ServiceProvider
         $this->app->bind(
             IJobRepository::class,
             JobRepository::class
+        );
+
+        $this->app->bind(
+            IAdminRepository::class,
+            AdminRepository::class
         );
     }
 }

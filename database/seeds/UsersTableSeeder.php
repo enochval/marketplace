@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Profile;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -24,7 +25,8 @@ class UsersTableSeeder extends Seeder
 
         $super_admin_user->profile()->create([
             'first_name' => 'Super',
-            'last_name' => 'Admin'
+            'last_name' => 'Admin',
+            'avatar' => Profile::AVATAR
         ]);
 
         $admin_user = User::create([
@@ -37,7 +39,8 @@ class UsersTableSeeder extends Seeder
         ]);
         $admin_user->profile()->create([
             'first_name' => 'Admin',
-            'last_name' => 'Timbala'
+            'last_name' => 'Timbala',
+            'avatar' => Profile::AVATAR
         ]);
 
         $agent_user = User::create([
@@ -51,7 +54,8 @@ class UsersTableSeeder extends Seeder
 
         $agent_user->profile()->create([
             'first_name' => 'Agent',
-            'last_name' => 'Timbala'
+            'last_name' => 'Timbala',
+            'avatar' => Profile::AVATAR
         ]);
 
         $employer_user = User::create([
@@ -62,10 +66,11 @@ class UsersTableSeeder extends Seeder
             'is_active' => true,
             'is_confirmed' => true,
         ]);
-        
+
         $employer_user->profile()->create([
             'first_name' => 'Employer',
-            'last_name' => 'Timbala'
+            'last_name' => 'Timbala',
+            'avatar' => Profile::AVATAR
         ]);
 
         $worker_user = User::create([
@@ -79,7 +84,8 @@ class UsersTableSeeder extends Seeder
 
         $worker_user->profile()->create([
             'first_name' => 'Worker',
-            'last_name' => 'Timbala'
+            'last_name' => 'Timbala',
+            'avatar' => Profile::AVATAR
         ]);
 
         $super_admin_role = Role::where('name', 'super_admin')->first();

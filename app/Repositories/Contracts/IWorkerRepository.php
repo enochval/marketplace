@@ -12,5 +12,5 @@ interface IWorkerRepository
 
     public function workHistory(int $user_id, array $params);
 
-    public function workerSkills(int $user_id, array $params);
+//    public function workerSkills(int $user_id, array $params);
 }

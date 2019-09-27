@@ -21,16 +21,18 @@ $router->get('/', function () use ($router) {
 $router->group(['prefix' => 'api/v1'], function () use($router) {
     $router->post('worker-registration', 'AuthController@registerWorker');
     $router->post('employer-registration', 'AuthController@registerEmployer');
+    $router->post('agent-registration', 'AuthController@registerAgent');
     $router->post('confirm-email', 'AuthController@confirmEmail');
     $router->post('authenticate', 'AuthController@authenticate');
 
     $router->patch('profile', 'UserController@profile');
     $router->post('work-history', 'UserController@workHistory');
-    $router->post('worker-skill', 'UserController@workerSkills');
 
     $router->post('verify-bvn', 'UserController@bvnVerification');
     $router->get('bvn-analysis', 'UserController@getBvnAnalysis');
     $router->get('callback', 'UserController@paymentCallback');
+
+    $router->post('subscribe', 'UserController@subscribe');
 
     $router->group(['prefix' => 'job-board'], function () use($router) {
         $router->post('', 'JobBoardController@createJob');

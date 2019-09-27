@@ -5,10 +5,13 @@ namespace App\Repositories\Concretes;
 
 use App\Jobs\SendChangePasswordEmail;
 use App\Jobs\SendPaymentReceiptEmailJob;
+use App\Jobs\SendVerificationEmailJob;
 use App\Jobs\SendWelcomeEmailJob;
 use App\Jobs\StoreBVNAnalysisJob;
 use App\Jobs\UpdateLastLoginJob;
+use App\Models\AgentCustomer;
 use App\Models\GeneralSetting;
+use App\Models\Profile;
 use App\Models\Role;
 use App\Models\Transaction;
 use App\Models\User;
@@ -17,6 +20,9 @@ use App\Repositories\Contracts\IUserRepository;
 use App\Services\Paystack;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -38,6 +44,61 @@ class UserRepository implements IUserRepository
         $this->user = User::find($user_id);
     }
 
+    /**
+     * @param array $params
+     * @param $role
+     * @throws Exception
+     */
+    public function register(array $params, $role): void
+    {
+
+        [
+            'email' => $email,
+            'phone' => $phone,
+            'first_name' => $first_name,
+            'last_name' => $last_name,
+            'password' => $password
+        ] = $params;
+
+        try {
+            // Persist data
+            $user = User::create([
+                'email' => $email,
+                'phone' => $phone,
+                'password' => bcrypt($password)
+            ]);
+
+            $user_id = $user->id;
+            $this->setUser($user_id);
+
+            $this->getUser()->profile()->create([
+                'first_name' => $first_name,
+                'last_name' => $last_name,
+                'avatar' => Profile::AVATAR
+            ]);
+
+            // Attach worker role
+            $this->assignRole($role);
+
+            // Generate user verification token
+            if (!$this->createVerificationToken())
+                throw new Exception("Could not create verification token for the registered user with id ${user_id}");
+
+            if (!$this->activate())
+                throw new Exception("Could not activate user user with id ${user_id}");
+
+            // Push this verification email to the queue (Basically sends this email to the registered worker)
+            dispatch(new SendVerificationEmailJob($this->getUser()));
+        } catch (Exception $e) {
+            report($e);
+
+            //Delete the user to avoid duplicate entry.
+            $this->getUser()->delete();
+
+            // Return a custom error message back....
+            throw new Exception("Unable to create user, please try again");
+        }
+    }
 
     /**
      * @param $credentials
@@ -73,6 +134,58 @@ class UserRepository implements IUserRepository
         ];
     }
 
+    public function activate(): bool
+    {
+        return $this->getUser()->update([
+            'is_active' => true
+        ]);
+    }
+
+    public function createVerificationToken(): UsersVerification
+    {
+        return $this->getUser()->verificationToken()->create([
+            'token' => str_random(40)
+        ]);
+    }
+
+    /**
+     * @param $role
+     * @throws Exception
+     */
+    public function assignRole($role): void
+    {
+        $user_role = Role::where('name', $role)->first();
+
+        if (!$user_role) {
+            throw new Exception("Unable to find expected role in the system");
+        }
+
+        $this->getUser()->attachRole($user_role);
+    }
+
+    public function workHistory(int $user_id, array $params): User
+    {
+        $this->setUser($user_id);
+
+        $this->getUser()->workHistory()->create([
+            'employer' => $params['employer'],
+            'position' => $params['position'],
+            'start_date' => $params['start_date'],
+            'end_date' => $params['end_date'],
+        ]);
+
+        $this->updateWorkHistoryStatus();
+
+        return $this->getWorkerDetails();
+    }
+
+    public function updateWorkHistoryStatus(): void
+    {
+        $this->getUser()->update([
+            'work_history_updated' => true
+        ]);
+    }
+
     public function setUserWithToken($token): void
     {
         $valid_token = UsersVerification::where('token', $token)->first();
@@ -104,7 +217,7 @@ class UserRepository implements IUserRepository
 
     public function getWorkerDetails()
     {
-        return User::with(['profile', 'workHistory', 'skill', 'roles', 'lastLogin'])->find($this->getUser()->id);
+        return User::with(['profile', 'workHistory', 'roles', 'lastLogin'])->find($this->getUser()->id);
     }
 
     /**
@@ -165,7 +278,8 @@ class UserRepository implements IUserRepository
             'address' => $params['address'],
             'city' => $params['city'],
             'state' => $params['state'],
-            'bio' => $params['bio'],
+            'job_interest' => json_encode($params['job_interest']),
+            'bio' => $params['bio']
         ]);
 
         $this->updateProfileStatus();
@@ -180,11 +294,10 @@ class UserRepository implements IUserRepository
     /**
      * @param int $user_id
      * @param int $bvn
-     * @param string $callback_url
      * @return mixed
      * @throws Exception
      */
-    public function bvnVerification(int $user_id, int $bvn, string $callback_url): array
+    public function bvnVerification(int $user_id, int $bvn = null): array
     {
         $this->setUser($user_id);
 
@@ -192,31 +305,17 @@ class UserRepository implements IUserRepository
             throw new Exception("Profile not updated! update your profile to proceed");
         }
 
-        $this->getUser()->profile()->update([
-            'bank_verification_number' => $bvn
-        ]);
-
-        if (!$this->hasPaid()) {
-            $paystack = new Paystack();
-
-            $amount = $this->getVerificationFee();
-            $reference = $paystack->genTranxRef();
-
-            $this->initializeTransaction($amount, $reference);
-
-            Cache::forget('callback_url');
-            Cache::put('callback_url', [
-                'callback_url' => $callback_url
-            ], Carbon::now()->addMinutes(10));
-
-            $initialization = $paystack->initialize($reference, $amount, $this->getUser()->email);
-
-            $url = data_get($initialization, 'data.authorization_url');
-
-            return ['authorization_url' => $url];
+        if (!is_null($bvn)) {
+            $this->getUser()->profile()->update([
+                'bank_verification_number' => $bvn
+            ]);
         }
 
-        $bvn_verify = (new Paystack())->bvnVerification($this->getUserBVN());
+        try {
+            $bvn_verify = (new Paystack())->bvnVerification($this->getUserBVN());
+        } catch (Exception $e) {
+            throw new Exception("Unable to connect to third party! Please try again.");
+        }
 
         $bvn_data = data_get($bvn_verify, 'data');
 
@@ -226,13 +325,47 @@ class UserRepository implements IUserRepository
             // Update bvn_verified status
             $this->updateBvnVerificationStatus();
 
-            //update premium status here I guess
-
-
             return ["bvn_verification_status" => "Valid"];
         }
 
         return ["bvn_verification_status" => "Invalid"];
+    }
+
+    /**
+     * @param $user_id
+     * @param $callback_url
+     * @return array
+     * @throws Exception
+     */
+    public function subscribe($user_id, $callback_url)
+    {
+        $this->setUser($user_id);
+
+        if ($this->isPremium()) {
+            throw new Exception('You are already a premium user!');
+        }
+        $paystack = new Paystack();
+
+        $amount = $this->getSubscriptionFee();
+        $reference = $paystack->genTranxRef();
+
+        $this->initializeTransaction($amount, $reference);
+
+        Cache::forget('callback_url');
+        Cache::put('callback_url', [
+            'callback_url' => $callback_url
+        ], Carbon::now()->addMinutes(10));
+
+        try {
+
+            $initialization = $paystack->initialize($reference, $amount, $this->getUser()->email);
+        } catch (Exception $e) {
+            throw new Exception("Connection Error: Please try again");
+        }
+
+        $url = data_get($initialization, 'data.authorization_url');
+
+        return ['authorization_url' => $url];
     }
 
     public function initializeTransaction($amount, $reference): void
@@ -247,13 +380,13 @@ class UserRepository implements IUserRepository
      * @return string
      * @throws Exception
      */
-    public function getVerificationFee(): string
+    public function getSubscriptionFee(): string
     {
         if (!$setting = GeneralSetting::find(1)) {
             throw new Exception('Settings not found');
         }
 
-        return $setting->verification_fee;
+        return $setting->subscription_fee;
     }
 
     /**
@@ -269,9 +402,7 @@ class UserRepository implements IUserRepository
 
         $verify_payment = $payment->verify($reference);
 
-        [
-            'status' => $status,
-        ] = $verify_payment;
+        ['status' => $status] = $verify_payment;
 
         $amount = $this->toNaira(data_get($verify_payment, 'data.amount'));
         $status_value = data_get($verify_payment, 'data.gateway_response');
@@ -286,34 +417,19 @@ class UserRepository implements IUserRepository
             'meta' => json_encode($verify_payment)
         ]);
 
-        $bvn_status = false;
-
         if ($payment->wasSuccessful($status_value)) {
             // send a mail
             dispatch(new SendPaymentReceiptEmailJob($this->getUser(), $amount, $status_value));
 
-            // Update payment status
-            $this->updatePaymentStatus();
-
-            $bvn_verify = $payment->bvnVerification($this->getUserBVN());
-
-            $bvn_data = data_get($bvn_verify, 'data');
-
-            $bvn_status = $this->analyzeBVN($bvn_data);
-
-            if ($bvn_status) {
-                // Update bvn_verified status
-                $this->updateBvnVerificationStatus();
-
-                //update premium status here I guess
-            }
-
-            // I don't know if you should make the user premium here....
+            $this->updatePremiumStatus();
         }
+        return $callback_url . '?payment_status=' . $status_value;
+    }
 
-        $bvn_status = $bvn_status ? "Valid" : "Invalid";
-
-        return $callback_url . '?payment_status=' . $status_value . '&bvn_verification_status=' . $bvn_status;
+    public function manualSubscription($user_id)
+    {
+        $this->setUser($user_id);
+        $this->updatePremiumStatus();
     }
 
     /**
@@ -329,10 +445,10 @@ class UserRepository implements IUserRepository
         return $transaction;
     }
 
-    public function updatePaymentStatus(): void
+    public function updatePremiumStatus(): void
     {
         $this->getUser()->update([
-            'has_paid' => true
+            'is_premium' => true
         ]);
     }
 
@@ -341,7 +457,7 @@ class UserRepository implements IUserRepository
         return $this->getUser()->profile->bank_verification_number;
     }
 
-    public function analyzeBVN($data) : bool
+    public function analyzeBVN($data): bool
     {
         $first_name = $this->getUser()->profile->first_name;
         $last_name = $this->getUser()->profile->last_name;
@@ -392,19 +508,19 @@ class UserRepository implements IUserRepository
         return ($payload['score'] > 50) ? true : false;
     }
 
-    public function hasPaid() : bool
+    public function isPremium(): bool
     {
-        return $this->getUser()->has_paid ?? false;
+        return $this->getUser()->is_premium ?? false;
     }
 
-    public function updateProfileStatus() : void
+    public function updateProfileStatus(): void
     {
         $this->getUser()->update([
             'profile_updated' => true
         ]);
     }
 
-    public function updateBvnVerificationStatus() : void
+    public function updateBvnVerificationStatus(): void
     {
         $this->getUser()->update([
             'is_bvn_verified' => true
@@ -530,5 +646,69 @@ class UserRepository implements IUserRepository
     public function allUsers($perPage = 15, $orderBy = 'created_at', $sort = 'desc')
     {
         return User::orderBy($orderBy, $sort)->paginate($perPage);
+    }
+
+    /**
+     * @param int $user_id
+     * @param array $params
+     * @return User|User[]|Builder|Builder[]|Collection|Model|null
+     * @throws Exception
+     */
+    public function registerWorkerByAgent(int $user_id, array $params)
+    {
+        $this->setUser($user_id);
+
+        $worker = User::create([
+            'email' => $params['email'],
+            'phone' => $params['phone'],
+            'password' => bcrypt($params['password'])
+        ]);
+
+        $worker_id = $worker->id;
+
+        $this->assignRole(Role::WORKER);
+
+        if (!$this->activate())
+            throw new Exception("Could not activate user user with id ${worker_id}");
+
+        if (!$this->confirmUser()) {
+            throw new Exception("Could not confirm user with user_id " . $worker_id);
+        }
+
+        dispatch(new SendWelcomeEmailJob($this->getUser()));
+
+        $worker->profile->create([
+            'first_name' => $params['first_name'],
+            'last_name' => $params['last_name'],
+            'gender' => $params['gender'],
+            'date_of_birth' => $params['date_of_birth'],
+            'avatar' => $params['avatar'],
+            'address' => $params['address'],
+            'city' => $params['city'],
+            'state' => $params['state'],
+            'job_interest' => json_encode($params['job_interest']),
+            'bio' => $params['bio'],
+            'bank_verification_number' => $params['bvn'],
+        ]);
+
+        $worker->workHistory->create([
+            'employer' => $params['employer'],
+            'position' => $params['position'],
+            'start_date' => $params['start_date'],
+            'end_date' => $params['end_date'],
+        ]);
+
+        $this->getUser()->agentCustomer()->create([
+            'worker_id' => $worker_id
+        ]);
+
+        $this->setUser($worker_id);
+
+        return $this->getWorkerDetails();
+    }
+
+    public function getAgentWorkers(int $user_id)
+    {
+        return AgentCustomer::with('workers')->where('user_id', $user_id)->get();
     }
 }

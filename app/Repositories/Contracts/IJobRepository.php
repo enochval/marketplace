@@ -31,4 +31,6 @@ interface IJobRepository
     public function approveJob($job_id);
 
     public function unApproveJob($job_id);
+
+    public function dashboardStat($user_id);
 }

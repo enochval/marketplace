@@ -31,6 +31,10 @@ class WorkerRepository implements IWorkerRepository
         $this->worker = User::find($worker_id);
     }
 
+    /**
+     * @param array $params
+     * @throws Exception
+     */
     public function register(array $params) : void
     {
         try {
@@ -99,7 +103,7 @@ class WorkerRepository implements IWorkerRepository
      */
     public function assignWorkerRole() : void
     {
-        $workerRole = Role::where('name', 'worker')->first();
+        $workerRole = Role::where('name', Role::WORKER)->first();
 
         if (!$workerRole) { throw new Exception("Unable to find worker role in the system"); }
 
@@ -108,7 +112,7 @@ class WorkerRepository implements IWorkerRepository
 
     public function getFullDetails(): User
     {
-        return User::with(['profile', 'workHistory', 'skill', 'roles', 'lastLogin'])->find($this->getWorker()->id);
+        return User::with(['profile', 'workHistory', 'roles', 'lastLogin'])->find($this->getWorker()->id);
     }
 
     public function isConfirmed(): bool
@@ -154,34 +158,10 @@ class WorkerRepository implements IWorkerRepository
         return $this->getFullDetails();
     }
 
-    public function workerSkills(int $user_id, array $params)
-    {
-        $this->setWorker($user_id);
-
-        $this->getWorker()->skill()->updateOrCreate(
-            [ 'user_id' => $this->getWorker()->id ],
-            [
-            'names' => json_encode($params['names']),
-            'category_id' => $params['category_id']
-            ]
-        );
-
-        $this->updateWorkerSkillsStatus();
-
-        return $this->getFullDetails();
-    }
-
     public function updateWorkHistoryStatus(): void
     {
         $this->getWorker()->update([
             'work_history_updated' => true
-        ]);
-    }
-
-    public function updateWorkerSkillsStatus(): void
-    {
-        $this->getWorker()->update([
-            'skills_updated' => true
         ]);
     }
 }

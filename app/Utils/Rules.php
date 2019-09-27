@@ -6,15 +6,7 @@ namespace App\Utils;
 class Rules
 {
     const RULES = [
-        'REGISTER_WORKER' => [
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
-            'email' => 'sometimes|unique:users|email',
-            'phone' => 'required|unique:users|digits:11',
-            'password' => 'required|confirmed|min:8'
-        ],
-
-        'REGISTER_EMPLOYER' => [
+        'REGISTER_USER' => [
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'email' => 'required|unique:users|email',
@@ -41,6 +33,7 @@ class Rules
             'city' => 'required|string',
             'state' => 'required|string',
             'bio' => 'required|string',
+            'job_interest' => 'required|array',
         ],
 
         'CHANGE_PASSWORD' => [
@@ -55,14 +48,12 @@ class Rules
             'end_date' => 'required|string',
         ],
 
-        'WORKER_SKILLS' => [
-            'names' => 'required|array',
-            'category_id' => 'required|numeric'
+        'BVN_VERIFICATION' => [
+            'bvn' => 'required|digits:11'
         ],
 
-        'BVN_VERIFICATION' => [
-            'bvn' => 'required|digits:11',
-            'callback_url' => 'required|active_url'
+        'SUBSCRIBE' => [
+            'callback_url' => 'required|url'
         ],
 
         'CREATE_JOB' => [
@@ -84,13 +75,40 @@ class Rules
 
         'JOB_REVIEW' => [
             'no_of_stars' => 'required|numeric|max:5',
-            'remark' => 'required|string'
+            'remark' => 'required|nullable'
+        ],
+
+        'REGISTER_WORKER_BY_AGENT' => [
+            'email' => 'required|unique:users|email',
+            'phone' => 'required|unique:users|digits:11',
+            'password' => 'required|confirmed|min:8',
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'avatar' => 'required|string',
+            'gender' => 'required|string',
+            'date_of_birth' => 'required|string',
+            'address' => 'required|string',
+            'city' => 'required|string',
+            'state' => 'required|string',
+            'bio' => 'required|string',
+            'job_interest' => 'required|array',
+            'bvn' => 'required|digits:11',
+            'employer' => 'required|string',
+            'position' => 'required|string',
+            'start_date' => 'required|string',
+            'end_date' => 'required|string',
         ]
     ];
 
-    public static function get($rule)
+    public static function get($rule, $validation = [])
     {
-        return data_get(self::RULES, $rule);
+        $rules = data_get(self::RULES, $rule);
+        if ($validation) {
+            foreach ($validation as $key => $item) {
+                data_set($rules, $key, $item, true);
+            }
+        }
+        return $rules;
     }
 
 }

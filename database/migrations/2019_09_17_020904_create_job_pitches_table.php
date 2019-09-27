@@ -18,6 +18,7 @@ class CreateJobPitchesTable extends Migration
             $table->integer('job_board_id');
             $table->integer('worker_id');
             $table->string('amount')->default(0);
+            $table->string('proposal')->nullable();
             $table->string('is_hired')->default(false);
             $table->timestamps();
         });

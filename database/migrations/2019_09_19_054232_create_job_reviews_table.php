@@ -19,7 +19,7 @@ class CreateJobReviewsTable extends Migration
             $table->integer('reviewee_id');
             $table->integer('job_id');
             $table->integer('no_of_stars');
-            $table->text('remark');
+            $table->text('remark')->nullable();
             $table->timestamps();
         });
     }

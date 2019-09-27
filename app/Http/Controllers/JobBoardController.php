@@ -345,11 +345,9 @@ class JobBoardController extends Controller
     public function getJobPitches($job_id)
     {
         try {
-
             $pitches = $this->jobRepository->getJobPitches($job_id);
 
             return $this->withData($pitches);
-
         } catch(Exception $e) {
             return $this->error($e->getMessage());
         }
@@ -434,6 +432,26 @@ class JobBoardController extends Controller
      *             format="int64"
      *         )
      *     ),
+     *     @OA\RequestBody(
+     *       required=true,
+     *       description="Request object",
+     *       @OA\MediaType(
+     *           mediaType="application/json",
+     *           @OA\Schema(
+     *              type="object",
+     *              @OA\Property(
+     *                  property="no_of_stars",
+     *                  description="No of stars",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="remark",
+     *                  description="Remarks",
+     *                  type="string",
+     *              ),
+     *           )
+     *       )
+     *     ),
      *     @OA\Response(
      *         response="200",
      *         description="Returns response object",
@@ -488,6 +506,26 @@ class JobBoardController extends Controller
      *             type="integer",
      *             format="int64"
      *         )
+     *     ),
+     *     @OA\RequestBody(
+     *       required=true,
+     *       description="Request object",
+     *       @OA\MediaType(
+     *           mediaType="application/json",
+     *           @OA\Schema(
+     *              type="object",
+     *              @OA\Property(
+     *                  property="no_of_stars",
+     *                  description="No of stars",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="remark",
+     *                  description="Remarks",
+     *                  type="string",
+     *              ),
+     *           )
+     *       )
      *     ),
      *     @OA\Response(
      *         response="200",
@@ -850,5 +888,20 @@ class JobBoardController extends Controller
         } catch (Exception $e) {
             return $this->error($e->getMessage());
         }
+    }
+
+    public function dashboardStat()
+    {
+
+    }
+
+    public function topJobs()
+    {
+
+    }
+
+    public function myAreaJobs()
+    {
+
     }
 }

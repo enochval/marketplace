@@ -13,20 +13,15 @@ use Illuminate\Support\Facades\Validator;
 class UserController extends Controller
 {
     /**
-     * @var IWorkerRepository
-     */
-    private $workerRepository;
-    /**
      * @var IUserRepository
      */
     private $userRepository;
 
     /**
      * UserController constructor.
-     * @param IWorkerRepository $workerRepository
      * @param IUserRepository $userRepository
      */
-    public function __construct(IWorkerRepository $workerRepository, IUserRepository $userRepository)
+    public function __construct(IUserRepository $userRepository)
     {
         $this->middleware('auth:api', ['except' => [
             'paymentCallback'
@@ -36,7 +31,6 @@ class UserController extends Controller
             'workHistory', 'workerSkills'
         ]]);
 
-        $this->workerRepository = $workerRepository;
         $this->userRepository = $userRepository;
     }
 
@@ -118,7 +112,9 @@ class UserController extends Controller
     public function profile()
     {
         $payload = request()->all();
+
         $validator = Validator::make($payload, Rules::get('UPDATE_PROFILE'));
+
         if ($validator->fails()) {
             return $this->validationErrors($validator->getMessageBag()->all());
         }
@@ -184,72 +180,14 @@ class UserController extends Controller
     public function workHistory()
     {
         $payload = request()->all();
+
         $validator = Validator::make($payload, Rules::get('WORK_HISTORY'));
         if ($validator->fails()) {
             return $this->validationErrors($validator->getMessageBag()->all());
         }
 
         try {
-            $profile = $this->workerRepository->workHistory(auth()->id(), $payload);
-            return $this->withData($profile);
-        } catch (Exception $e) {
-            return $this->error($e->getMessage());
-        }
-    }
-
-    /**
-     * @OA\Post(
-     *     path="/worker-skill",
-     *     operationId="WorkerSkill",
-     *     tags={"User Management"},
-     *     security={{"authorization_token": {}}},
-     *     summary="Create worker skills",
-     *     description="Can only be perform by a worker user",
-     *     @OA\RequestBody(
-     *       required=true,
-     *       description="Request object",
-     *       @OA\MediaType(
-     *           mediaType="application/json",
-     *           @OA\Schema(
-     *              type="object",
-     *              @OA\Property(
-     *                  property="names",
-     *                  description="Comma seperated values as skills",
-     *                  type="array",
-     *                  @OA\Items(
-     *                      type="string"
-     *                  )
-     *              ),
-     *              @OA\Property(
-     *                  property="category_id",
-     *                  description="Category ID",
-     *                  type="string",
-     *              ),
-     *           )
-     *       )
-     *     ),
-     *     @OA\Response(
-     *         response="200",
-     *         description="Returns response object",
-     *         @OA\JsonContent()
-     *     ),
-     *     @OA\Response(
-     *          response="422",
-     *          description="Error: Unproccessble Entity. When required parameters were not supplied correctly.",
-     *          @OA\JsonContent()
-     *     )
-     * )
-     */
-    public function workerSkills()
-    {
-        $payload = request()->all();
-        $validator = Validator::make($payload, Rules::get('WORKER_SKILLS'));
-        if ($validator->fails()) {
-            return $this->validationErrors($validator->getMessageBag()->all());
-        }
-
-        try {
-            $profile = $this->workerRepository->workerSkills(auth()->id(), $payload);
+            $profile = $this->userRepository->workHistory(auth()->id(), $payload);
             return $this->withData($profile);
         } catch (Exception $e) {
             return $this->error($e->getMessage());
@@ -298,19 +236,17 @@ class UserController extends Controller
      */
     public function bvnVerification()
     {
-        $payload = request()->all();
+        $payload = request()->only('bvn');
+
         $validator = Validator::make($payload, Rules::get('BVN_VERIFICATION'));
         if ($validator->fails()) {
             return $this->validationErrors($validator->getMessageBag()->all());
         }
 
-        [
-            'bvn' => $bvn,
-            'callback_url' => $callback_url
-        ] = $payload;
+        ['bvn' => $bvn] = $payload;
 
         try {
-            $response = $this->userRepository->bvnVerification(auth()->id(), $bvn, $callback_url);
+            $response = $this->userRepository->bvnVerification(auth()->id(), $bvn);
             return $this->withData($response);
         } catch (Exception $e) {
             return $this->error($e->getMessage());
@@ -402,6 +338,7 @@ class UserController extends Controller
     public function changePassword()
     {
         $payload = request()->all();
+
         $validator = Validator::make($payload, Rules::get('CHANGE_PASSWORD'));
         if ($validator->fails()) {
             return $this->validationErrors($validator->getMessageBag()->all());
@@ -410,6 +347,93 @@ class UserController extends Controller
         try {
             $this->userRepository->updatePassword(auth()->id(), request()->all());
             return $this->success("Password successfully changed!");
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    public function registerWorkerByAgent()
+    {
+        $payload = request()->all();
+
+        $validator = Validator::make($payload, Rules::get('REGISTER_WORKER_BY_AGENT'));
+        if ($validator->fails()) {
+            return $this->validationErrors($validator->getMessageBag()->all());
+        }
+
+        try {
+            $this->userRepository->updatePassword(auth()->id(), request()->all());
+            return $this->success("Password successfully changed!");
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    public function getAgentWorkers()
+    {
+        try {
+            $workers = $this->userRepository->getAgentWorkers(auth()->id());
+            return $this->withData($workers);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/subscribe",
+     *     operationId="subscribe",
+     *     tags={"User Management"},
+     *     security={{"authorization_token": {}}},
+     *     summary="Subscribe to premium membership",
+     *     description="",
+     *     @OA\RequestBody(
+     *       required=true,
+     *       description="Request object",
+     *       @OA\MediaType(
+     *           mediaType="application/json",
+     *           @OA\Schema(
+     *              type="object",
+     *              @OA\Property(
+     *                  property="callback_url",
+     *                  description="The url to the page to return to after payment collection",
+     *                  type="string",
+     *              )
+     *           )
+     *       )
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns response object",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *          response="422",
+     *          description="Error: Unproccessble Entity. When required parameters were not supplied correctly.",
+     *          @OA\JsonContent()
+     *     )
+     * )
+     */
+    public function subscribe()
+    {
+        $validator = Validator::make(request()->only('callback_url'), Rules::get('SUBSCRIBE'));
+        if ($validator->fails()) {
+            return $this->validationErrors($validator->getMessageBag()->all());
+        }
+
+        try {
+            $response = $this->userRepository->subscribe(auth()->id(), request()->callback_url);
+            return $this->withData($response);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    public function verifyBvn($user_id)
+    {
+        try {
+            $response = $this->userRepository->bvnVerification($user_id);
+            return $this->withData($response);
         } catch (Exception $e) {
             return $this->error($e->getMessage());
         }
