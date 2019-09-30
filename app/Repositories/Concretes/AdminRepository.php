@@ -5,8 +5,9 @@ namespace App\Repositories\Concretes;
 
 use App\Models\Category;
 use App\Models\City;
+use App\Repositories\Contracts\IAdminRepository;
 
-class AdminRepository
+class AdminRepository implements IAdminRepository
 {
     public function addCity($params)
     {
@@ -20,5 +21,15 @@ class AdminRepository
         return Category::create([
             'name' => $params['category']
         ]);
+    }
+
+    public function getCities()
+    {
+        return City::all();
+    }
+
+    public function getCategories()
+    {
+        return Category::all();
     }
 }

@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Repositories\Contracts\IJobRepository;
 use App\Utils\Rules;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 
 class JobBoardController extends Controller
@@ -26,7 +27,7 @@ class JobBoardController extends Controller
         ]]);
 
         $this->middleware('role:super_admin|worker', ['only' => [
-            'bid', 'reviewEmployer'
+            'bid', 'reviewEmployer', 'bidStatus'
         ]]);
 
         $this->middleware('role:super_admin|admin', ['only' => [
@@ -231,7 +232,7 @@ class JobBoardController extends Controller
      *     )
      * )
      * @param $job_id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function updateJob($job_id)
     {
@@ -295,7 +296,7 @@ class JobBoardController extends Controller
      *     )
      * )
      * @param $job_id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function bid($job_id)
     {
@@ -340,7 +341,7 @@ class JobBoardController extends Controller
      *     ),
      * )
      * @param $job_id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function getJobPitches($job_id)
     {
@@ -389,7 +390,7 @@ class JobBoardController extends Controller
      * )
      * @param $worker_id
      * @param $job_id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function hireWorker($worker_id, $job_id)
     {
@@ -460,7 +461,7 @@ class JobBoardController extends Controller
      * )
      * @param $worker_id
      * @param $job_id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function reviewWorker($worker_id, $job_id)
     {
@@ -535,7 +536,7 @@ class JobBoardController extends Controller
      * )
      * @param $employer_id
      * @param $job_id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function reviewEmployer($employer_id, $job_id)
     {
@@ -579,7 +580,7 @@ class JobBoardController extends Controller
      *     ),
      * )
      * @param $job_id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function jobReviews($job_id)
     {
@@ -617,7 +618,7 @@ class JobBoardController extends Controller
      *     )
      * )
      * @param $job_id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function completeJob($job_id)
     {
@@ -672,7 +673,7 @@ class JobBoardController extends Controller
      *         @OA\JsonContent()
      *     ),
      * )
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function jobListing()
     {
@@ -734,7 +735,7 @@ class JobBoardController extends Controller
      *         @OA\JsonContent()
      *     ),
      * )
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function allJobs()
     {
@@ -779,7 +780,7 @@ class JobBoardController extends Controller
      *     )
      * )
      * @param $job_id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function approveJob($job_id)
     {
@@ -817,7 +818,7 @@ class JobBoardController extends Controller
      *     )
      * )
      * @param $job_id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function unApproveJob($job_id)
     {
@@ -872,7 +873,7 @@ class JobBoardController extends Controller
      *         @OA\JsonContent()
      *     ),
      * )
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function myJobs()
     {
@@ -890,18 +891,169 @@ class JobBoardController extends Controller
         }
     }
 
+    /**
+     * @OA\Get(
+     *     path="/dashboard-stat",
+     *     operationId="dashboardStat",
+     *     tags={"Common"},
+     *     security={{"authorization_token": {}}},
+     *     summary="Get dashboard metrics",
+     *     description="",
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns response object",
+     *         @OA\JsonContent()
+     *     ),
+     * )
+     * @return JsonResponse
+     */
     public function dashboardStat()
     {
 
+        try {
+            $data = $this->jobRepository->dashboardStat(auth()->id());
+            return $this->withData($data);
+
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
     }
 
+    /**
+     * @OA\Get(
+     *     path="/top-jobs",
+     *     operationId="topJobs",
+     *     tags={"Job Board Operations"},
+     *     security={{"authorization_token": {}}},
+     *     summary="Get top jobs",
+     *     description="",
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number per page",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="integer",
+     *             format="int64"
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns response object",
+     *         @OA\JsonContent()
+     *     ),
+     * )
+     * @return JsonResponse
+     */
     public function topJobs()
     {
+        $payload = request()->all();
+        $perPage = request()->has('per_page') ? $payload['per_page'] : 5;
 
+        try {
+            $data = $this->jobRepository->getTopJobs($perPage);
+            return $this->withData($data);
+
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
     }
 
+    /**
+     * @OA\Get(
+     *     path="/my-area-jobs",
+     *     operationId="myAreaJobs",
+     *     tags={"Job Board Operations"},
+     *     security={{"authorization_token": {}}},
+     *     summary="Get jobs in my area",
+     *     description="",
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number per page",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="integer",
+     *             format="int64"
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         name="order_by",
+     *         in="query",
+     *         description="Order by a column",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="string",
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         name="sort",
+     *         in="query",
+     *         description="desc or asc",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="string",
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns response object",
+     *         @OA\JsonContent()
+     *     ),
+     * )
+     * @return JsonResponse
+     */
     public function myAreaJobs()
     {
+        $payload = request()->all();
+        $perPage = request()->has('per_page') ? $payload['per_page'] : 5;
+        $orderBy = request()->has('order_by') ? $payload['order_by'] : 'created_at';
+        $sort = request()->has('sort') ? $payload['sort'] : 'desc';
 
+        try {
+            $data = $this->jobRepository->getJobsInMyArea(auth()->id(), $perPage, $orderBy, $sort);
+            return $this->withData($data);
+
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/bid-status/{job_id}",
+     *     operationId="bidStatus",
+     *     tags={"Job Board Operations"},
+     *     security={{"authorization_token": {}}},
+     *     summary="Check if a worker has applied for a job",
+     *     description="",
+     *      @OA\Parameter(
+     *         name="job_id",
+     *         in="path",
+     *         description="The Job id",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="integer",
+     *             format="int64"
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns response object",
+     *         @OA\JsonContent()
+     *     ),
+     * )
+     * @param $job_id
+     * @return JsonResponse
+     */
+    public function bidStatus($job_id)
+    {
+        try {
+            $data = $this->jobRepository->hasApplied(auth()->id(), $job_id);
+            return $this->withData($data);
+
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
     }
 }

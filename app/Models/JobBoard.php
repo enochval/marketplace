@@ -12,7 +12,7 @@ class JobBoard extends BaseModel
     ];
 
     protected $hidden = [
-        'updated_at'
+        'updated_at', 'city_id', 'category_id'
     ];
 
     public function employer()
@@ -22,18 +22,15 @@ class JobBoard extends BaseModel
 
     public function city()
     {
-        return $this->hasOne(City::class);
+        return $this->hasOne(City::class, 'id', 'city_id')->select([
+            'id', 'name'
+        ]);
     }
 
     public function category()
     {
-        return $this->hasOne(Category::class);
-    }
-
-    public function hireCheck()
-    {
-        return $this->hasMany(JobPitch::class, 'job_board_id', 'id')
-            ->select(['id', 'is_hired'])
-            ->where('worker_id', auth()->id());
+        return $this->hasOne(Category::class, 'id', 'category_id')->select([
+            'id', 'name'
+        ]);
     }
 }

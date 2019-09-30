@@ -32,4 +32,6 @@ interface IUserRepository
     public function subscribe($user_id, $callback_url);
 
     public function manualSubscription($user_id);
+
+    public function allUsers($perPage = 15, $orderBy = 'created_at', $sort = 'desc');
 }

@@ -17,8 +17,18 @@ class Profile extends BaseModel
         'user_id', 'id', 'created_at', 'updated_at', 'deleted_at'
     ];
 
+    public function getJobInterestAttribute($value)
+    {
+        if (!$value)
+            return $value;
+
+        $job_interests = json_decode($value);
+
+        return Category::find($job_interests);
+    }
+
     public function city()
     {
-        return $this->hasOne(City::class);
+        return $this->hasOne(City::class, 'id', 'city');
     }
 }

@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\JobBoard;
 use App\Repositories\Contracts\IJobRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 
 class JobRepository implements IJobRepository
 {
@@ -46,7 +47,7 @@ class JobRepository implements IJobRepository
 
         ['no_of_resource' => $no_of_resource] = $params;
 
-        if (!$this->hasPaid($this->getUser())) {
+        if (!$this->isPremium($this->getUser())) {
             if ($this->exceedFreemiumResource($no_of_resource)) {
                 throw new Exception("You have exceed the number of resource as a Freemium subscriber! Become a premium subscriber today.");
             }
@@ -58,13 +59,13 @@ class JobRepository implements IJobRepository
             'description' => $params['description'],
             'duration' => $params['duration'],
             'frequency' => $params['frequency'],
-            'budget' => $params['budget'],
+            'budget' => !empty($params['budget']) ? $params['budget'] : 'Negotiable',
             'no_of_resource' => $no_of_resource,
             'address' => $params['address'],
             'city_id' => $params['city_id'],
             'state' => $params['state'],
             'category_id' => $params['category_id'],
-            'gender' => $params['gender'],
+            'gender' => !empty($params['gender']) ? $params['gender'] : 'Any',
         ]);
 
         $this->updateSubmitStatus($job);
@@ -240,6 +241,9 @@ class JobRepository implements IJobRepository
             ->first())
             throw new Exception('Job pitch was not found!');
 
+        if ($this->isHired($worker_id, $job_id))
+            throw new Exception('This worker is already hired');
+
         // check to see that it hasn't exceeded the no of resource
         if ($this->hasHiredRequiredResource($job_id))
             throw new Exception('You cannot hire this resource! you have hired all needed resource for this job.');
@@ -266,6 +270,12 @@ class JobRepository implements IJobRepository
         }
 
         return $this->getWorkerJobPitch($job_id, $worker_id);
+    }
+
+    public function isHired($worker_id, $job_id)
+    {
+        $job_pitch = $this->getWorkerJobPitch($job_id, $worker_id);
+        return $job_pitch->is_hired ?? false;
     }
 
     public function updateSubmitStatus(JobBoard $jobBoard): void
@@ -369,12 +379,14 @@ class JobRepository implements IJobRepository
         return JobPitch::with('worker')
             ->where('job_board_id', $job_id)
             ->where('worker_id', $worker_id)
-            ->get();
+            ->first();
     }
 
     public function getJobPitches($job_id)
     {
-        return JobPitch::with('worker')->where('job_board_id', $job_id)->get();
+        return JobPitch::with(
+            'worker.profile:user_id,first_name,last_name,avatar,gender,state,bio'
+        )->where('job_board_id', $job_id)->get();
     }
 
     /**
@@ -483,7 +495,7 @@ class JobRepository implements IJobRepository
 
     public function jobListing($perPage = 15, $orderBy = 'created_at', $sort = 'desc')
     {
-        return JobBoard::with(['city', 'category', 'hireCheck'])
+        return JobBoard::with(['city', 'category'])
             ->where('is_submitted', true)
             ->where('is_approved', true)
             ->where('is_running', false)
@@ -524,26 +536,37 @@ class JobRepository implements IJobRepository
     {
         $this->setUser($user_id);
 
-        $user_city_id = $this->getUser()->profile->city_id;
+        // remember to change this to city_id
+        $user_city_id = $this->getUser()->profile->city;
 
-        return JobBoard::with(['city', 'category', 'hireCheck'])
+        return JobBoard::with(['city', 'category'])
             ->where('city_id', $user_city_id)
+            ->where('is_submitted', true)
+            ->where('is_approved', true)
+            ->where('is_running', false)
+            ->where('is_completed', false)
             ->orderBy($orderBy, $sort)
             ->paginate($perPage);
     }
 
     public function getTopJobs($perPage = 5)
     {
-        return JobBoard::with(['city', 'category', 'hireCheck'])
-            ->orderBy('budget', 'asc')
+        return JobBoard::with(['city', 'category'])
+            ->where('is_submitted', true)
+            ->where('is_approved', true)
+            ->where('is_running', false)
+            ->where('is_completed', false)
+            ->orderBy('budget', 'desc')
             ->paginate($perPage);
     }
 
     public function getUserNoOfCompletedJobs($user_id)
     {
-        return JobPitch::with('completedJob')
-            ->where('worker_id', $user_id)
+        return JobPitch::where('worker_id', $user_id)
             ->where('is_hired', true)
+            ->whereHas('job', function (Builder $query) {
+                $query->where('is_completed', true);
+            })
             ->count();
 
     }
@@ -553,19 +576,29 @@ class JobRepository implements IJobRepository
 
     }
 
+    public function getJobsThatMayInterestYou($user_id)
+    {
+
+    }
+
     public function getUserRunningJobs($user_id)
     {
-        return JobPitch::with('runningJobs')
-            ->where('worker_id', $user_id)
+        return JobPitch::where('worker_id', $user_id)
             ->where('is_hired', true)
+            ->whereHas('job', function (Builder $query) {
+                $query->where('is_completed', false)
+                    ->where('is_running', true);
+            })
             ->count();
     }
 
     public function getTotalAmountEarned($user_id)
     {
-        $jobs = JobPitch::with('completedJob')
-            ->where('worker_id', $user_id)
+        $jobs = JobPitch::where('worker_id', $user_id)
             ->where('is_hired', true)
+            ->whereHas('job', function (Builder $query) {
+                $query->where('is_completed', true);
+            })
             ->get();
 
         $total_amount = 0;
@@ -576,6 +609,7 @@ class JobRepository implements IJobRepository
 
         return $total_amount;
     }
+
 
     public function dashboardStat($user_id)
     {

@@ -212,12 +212,12 @@ class UserRepository implements IUserRepository
 
     public function getFullDetails(): User
     {
-        return User::with(['profile', 'roles', 'lastLogin'])->find($this->user->id);
+        return User::with(['profile.city', 'roles', 'lastLogin'])->find($this->user->id);
     }
 
     public function getWorkerDetails()
     {
-        return User::with(['profile', 'workHistory', 'roles', 'lastLogin'])->find($this->getUser()->id);
+        return User::with(['profile.city', 'workHistory', 'roles', 'lastLogin'])->find($this->getUser()->id);
     }
 
     /**
@@ -276,7 +276,7 @@ class UserRepository implements IUserRepository
             'date_of_birth' => $params['date_of_birth'],
             'avatar' => $params['avatar'],
             'address' => $params['address'],
-            'city' => $params['city'],
+            'city' => $params['city_id'],
             'state' => $params['state'],
             'job_interest' => json_encode($params['job_interest']),
             'bio' => $params['bio']
@@ -568,81 +568,6 @@ class UserRepository implements IUserRepository
         dispatch(new SendChangePasswordEmail($this->getUser()));
     }
 
-//    /**
-//     * @param $params
-//     * @throws Exception
-//     */
-//    public function createUser($params)
-//    {
-//        try {
-//            $user = User::create([
-//                'email' => $params['email'],
-//                'phone' => $params['phone'],
-//                'password' => bcrypt($params['password'])
-//            ]);
-//
-//            $user->profile()->create([
-//                'first_name' => $params['first_name'],
-//                'last_name' => $params['last_name'],
-//            ]);
-//
-//            $user->attachRole($params['role_id']);
-//
-//            $this->createVerificationToken($user);
-//
-//            $this->activate($user);
-//        } catch (Exception $e) {
-//            report($e);
-//
-//            //Delete the user to avoid duplicate entry.
-//            $user->delete();
-//
-//            // Return a custom error message back....
-//            throw new Exception("Unable to create user, please try again");
-//        }
-//    }
-//
-//    public function update($user_id, $params)
-//    {
-//        try {
-//            $user = User::find($user_id);
-//
-//            $user->update([
-//                'email' => $params['email'],
-//                'phone' => $params['phone'],
-//            ]);
-//
-//            $user->profile()->update([
-//                'first_name' => $params['first_name'],
-//                'last_name' => $params['last_name'],
-//            ]);
-//
-//            $user->attachRole($params['role_id']);
-//
-//        } catch (Exception $e) {
-//            report($e);
-//
-//            //Delete the user to avoid duplicate entry.
-//            $user->delete();
-//
-//            // Return a custom error message back....
-//            throw new Exception("Unable to create user, please try again");
-//        }
-//    }
-
-//    public function createVerificationToken(User $user): void
-//    {
-//        $user->verificationToken()->create([
-//            'token' => str_random(40)
-//        ]);
-//    }
-//
-//    public function activate(User $user): bool
-//    {
-//        return $user->update([
-//            'is_active' => true
-//        ]);
-//    }
     public function allUsers($perPage = 15, $orderBy = 'created_at', $sort = 'desc')
     {
         return User::orderBy($orderBy, $sort)->paginate($perPage);

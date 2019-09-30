@@ -22,7 +22,7 @@ class CreateProfilesTable extends Migration
             $table->string("gender")->nullable();
             $table->string('bank_verification_number')->nullable();
             $table->text('address')->nullable();
-            $table->string('city')->nullable();
+            $table->string('city_id')->nullable();
             $table->string('state')->nullable();
             $table->string('date_of_birth')->nullable();
             $table->text('job_interest')->nullable();

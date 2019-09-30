@@ -28,7 +28,11 @@ class UserController extends Controller
         ]]);
 
         $this->middleware('role:worker', ['only' => [
-            'workHistory', 'workerSkills'
+            'workHistory'
+        ]]);
+
+        $this->middleware('role:super_admin|admin', ['only' => [
+            'allUsers'
         ]]);
 
         $this->userRepository = $userRepository;
@@ -292,7 +296,7 @@ class UserController extends Controller
 
     /**
      * @OA\Patch(
-     *     path="/change-password",
+     *     path="/update-password",
      *     operationId="changePassword",
      *     tags={"User Management"},
      *     security={{"authorization_token": {}}},
@@ -335,7 +339,7 @@ class UserController extends Controller
      *     )
      * )
      */
-    public function changePassword()
+    public function updatePassword()
     {
         $payload = request()->all();
 
@@ -352,6 +356,134 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * @OA\Post(
+     *     path="/worker-registration-by-agent",
+     *     operationId="agentRegisterWorker",
+     *     tags={"Agents"},
+     *     security={{"authorization_token": {}}},
+     *     summary="Register a worker",
+     *     description="",
+     *     @OA\RequestBody(
+     *       required=true,
+     *       description="Request object",
+     *       @OA\MediaType(
+     *           mediaType="application/json",
+     *           @OA\Schema(
+     *              type="object",
+     *              @OA\Property(
+     *                  property="email",
+     *                  description="Email",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="phone",
+     *                  description="Phone",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="password",
+     *                  description="Password",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="password_confirmation",
+     *                  description="Confirm Password",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="first_name",
+     *                  description="First Name",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="last_name",
+     *                  description="Last Name",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="avatar",
+     *                  description="Avatar",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="gender",
+     *                  description="Gender",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="date_of_birth",
+     *                  description="Date of Birth",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="address",
+     *                  description="Address",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="city",
+     *                  description="City",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="state",
+     *                  description="State",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="bio",
+     *                  description="Bio",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="job_interest",
+     *                  description="Job Interest",
+     *                  type="array",
+     *                  @OA\Items(
+     *                      type="string"
+     *                  )
+     *              ),
+     *              @OA\Property(
+     *                  property="bvn",
+     *                  description="Bank Verification Number",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="employer",
+     *                  description="Employer",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="position",
+     *                  description="Position",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="start_date",
+     *                  description="Start Date",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="end_date",
+     *                  description="End Date",
+     *                  type="string",
+     *              ),
+     *           )
+     *       )
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns response object",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *          response="422",
+     *          description="Error: Unproccessble Entity. When required parameters were not supplied correctly.",
+     *          @OA\JsonContent()
+     *     )
+     * )
+     */
     public function registerWorkerByAgent()
     {
         $payload = request()->all();
@@ -362,13 +494,28 @@ class UserController extends Controller
         }
 
         try {
-            $this->userRepository->updatePassword(auth()->id(), request()->all());
-            return $this->success("Password successfully changed!");
+            $data = $this->userRepository->registerWorkerByAgent(auth()->id(), request()->all());
+            return $this->withData($data);
         } catch (Exception $e) {
             return $this->error($e->getMessage());
         }
     }
 
+    /**
+     * @OA\Get(
+     *     path="/agent-workers",
+     *     operationId="agentWorkers",
+     *     tags={"User Management"},
+     *     security={{"authorization_token": {}}},
+     *     summary="Get an agent registered workers",
+     *     description="",
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns response object",
+     *         @OA\JsonContent()
+     *     ),
+     * )
+     */
     public function getAgentWorkers()
     {
         try {
@@ -433,6 +580,64 @@ class UserController extends Controller
     {
         try {
             $response = $this->userRepository->bvnVerification($user_id);
+            return $this->withData($response);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/admin/all-users",
+     *     operationId="getAllUsers",
+     *     tags={"Admin Operations"},
+     *     security={{"authorization_token": {}}},
+     *     summary="Get all users",
+     *     description="Can only be performed by an admin",
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number per page",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="integer",
+     *             format="int64"
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         name="order_by",
+     *         in="query",
+     *         description="Order by a column",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="string",
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         name="sort",
+     *         in="query",
+     *         description="desc or asc",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="string",
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns response object",
+     *         @OA\JsonContent()
+     *     ),
+     * )
+     */
+    public function allUsers()
+    {
+        $payload = request()->all();
+        $perPage = request()->has('per_page') ? $payload['per_page'] : 15;
+        $orderBy = request()->has('order_by') ? $payload['order_by'] : 'created_at';
+        $sort = request()->has('sort') ? $payload['sort'] : 'desc';
+
+        try {
+            $response = $this->userRepository->allUsers($perPage, $orderBy, $sort);
             return $this->withData($response);
         } catch (Exception $e) {
             return $this->error($e->getMessage());

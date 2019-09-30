@@ -30,10 +30,11 @@ class Rules
             'gender' => 'required|string',
             'date_of_birth' => 'required|string',
             'address' => 'required|string',
-            'city' => 'required|string',
+            'city_id' => 'required|numeric',
             'state' => 'required|string',
             'bio' => 'required|string',
-            'job_interest' => 'required|array',
+            'job_interest' => 'sometimes|array',
+            'job_interest.*' => 'required|numeric'
         ],
 
         'CHANGE_PASSWORD' => [
@@ -61,16 +62,18 @@ class Rules
             'description' => 'required',
             'duration' => 'required|numeric',
             'frequency' => 'required',
-            'amount' => 'required|numeric',
+            'budget' => 'sometimes',
             'no_of_resource' => 'required',
-            'supporting_images' => 'required|array',
             'address' => 'required',
-            'city' => 'required',
-            'state' => 'required'
+            'city_id' => 'required',
+            'state' => 'required',
+            'category_id' => 'required',
+            'gender' => 'sometimes'
         ],
 
         'BID' => [
-            'amount' => 'required|numeric'
+            'amount' => 'required|numeric',
+            'proposal' => 'sometimes|string'
         ],
 
         'JOB_REVIEW' => [

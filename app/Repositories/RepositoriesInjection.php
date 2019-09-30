@@ -4,11 +4,7 @@
 namespace App\Repositories;
 
 use App\Repositories\Concretes\AdminRepository;
-use App\Repositories\Concretes\WorkerRepository;
 use App\Repositories\Contracts\IAdminRepository;
-use App\Repositories\Contracts\IWorkerRepository;
-use App\Repositories\Concretes\EmployerRepository;
-use App\Repositories\Contracts\IEmployerRepository;
 use App\Repositories\Concretes\UserRepository;
 use App\Repositories\Contracts\IUserRepository;
 use App\Repositories\Concretes\JobRepository;
@@ -19,16 +15,6 @@ class RepositoriesInjection extends ServiceProvider
 {
     public function register()
     {
-        $this->app->bind(
-            IWorkerRepository::class,
-            WorkerRepository::class
-        );
-
-        $this->app->bind(
-            IEmployerRepository::class,
-            EmployerRepository::class
-        );
-
         $this->app->bind(
             IUserRepository::class,
             UserRepository::class

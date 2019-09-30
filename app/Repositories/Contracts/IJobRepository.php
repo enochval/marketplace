@@ -33,4 +33,10 @@ interface IJobRepository
     public function unApproveJob($job_id);
 
     public function dashboardStat($user_id);
+
+    public function hasApplied($worker_id, $job_id);
+
+    public function getJobsInMyArea($user_id, $perPage = 5, $orderBy = 'created_at', $sort = 'desc');
+
+    public function getTopJobs($perPage = 5);
 }

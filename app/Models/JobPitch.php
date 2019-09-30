@@ -17,24 +17,11 @@ class JobPitch extends BaseModel
     public function worker()
     {
         return $this->hasOne(User::class, 'id', 'worker_id')
-            ->select(['id', 'email', 'phone'])
-            ->with('profile');
+            ->select(['id', 'email', 'phone']);
     }
 
     public function job()
     {
         return $this->hasOne(JobBoard::class, 'id','job_board_id');
-    }
-
-    public function completedJob()
-    {
-        return $this->hasOne(JobBoard::class, 'id','job_board_id')
-            ->where('is_completed', true);
-    }
-
-    public function runningJobs()
-    {
-        return $this->hasOne(JobBoard::class, 'id','job_board_id')
-            ->where('is_running', true);
     }
 }
