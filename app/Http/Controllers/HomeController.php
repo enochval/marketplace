@@ -25,7 +25,7 @@ class HomeController extends Controller
      * @OA\Get(
      *     path="/utils/cities",
      *     operationId="cities",
-     *     tags={"Utils"},
+     *     tags={"Common"},
      *     security={{"authorization_token": {}}},
      *     summary="Get available cities",
      *     description="",
@@ -50,7 +50,7 @@ class HomeController extends Controller
      * @OA\Get(
      *     path="/utils/categories",
      *     operationId="categories",
-     *     tags={"Utils"},
+     *     tags={"Common"},
      *     security={{"authorization_token": {}}},
      *     summary="Get available categories",
      *     description="",

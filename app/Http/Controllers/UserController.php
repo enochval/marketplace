@@ -363,7 +363,7 @@ class UserController extends Controller
      * @OA\Post(
      *     path="/agent/register-worker",
      *     operationId="agentRegisterWorker",
-     *     tags={"Agents"},
+     *     tags={"Agent Operations"},
      *     security={{"authorization_token": {}}},
      *     summary="Register a worker",
      *     description="",
@@ -508,7 +508,7 @@ class UserController extends Controller
      * @OA\Get(
      *     path="/agent/workers",
      *     operationId="agentWorkers",
-     *     tags={"User Management"},
+     *     tags={"Agent Operations"},
      *     security={{"authorization_token": {}}},
      *     summary="Get an agent registered workers",
      *     description="",
