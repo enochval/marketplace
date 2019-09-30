@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 
 
 use App\Repositories\Contracts\IUserRepository;
-use App\Repositories\Contracts\IWorkerRepository;
 use App\Utils\Rules;
 use Exception;
 use Illuminate\Support\Facades\Validator;
@@ -33,6 +32,10 @@ class UserController extends Controller
 
         $this->middleware('role:super_admin|admin', ['only' => [
             'allUsers'
+        ]]);
+
+        $this->middleware('role:super_admin|agent', ['only' => [
+            'registerWorkerByAgent', 'getAgentWorkers'
         ]]);
 
         $this->userRepository = $userRepository;
@@ -358,7 +361,7 @@ class UserController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/worker-registration-by-agent",
+     *     path="/agent/register-worker",
      *     operationId="agentRegisterWorker",
      *     tags={"Agents"},
      *     security={{"authorization_token": {}}},
@@ -503,7 +506,7 @@ class UserController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/agent-workers",
+     *     path="/agent/workers",
      *     operationId="agentWorkers",
      *     tags={"User Management"},
      *     security={{"authorization_token": {}}},

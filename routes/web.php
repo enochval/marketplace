@@ -72,6 +72,8 @@ $router->group(['prefix' => 'api/v1'], function () use ($router) {
         $router->patch('jobs/{id}/reverse-approval', 'JobBoardController@unApproveJob');
     });
 
-    $router->post('worker-registration-by-agent', 'UserController@registerWorkerByAgent');
-    $router->post('agent-workers', 'UserController@getAgentWorkers');
+    $router->group(['prefix' => 'agent'], function () use ($router) {
+        $router->post('register-worker', 'UserController@registerWorkerByAgent');
+        $router->get('workers', 'UserController@getAgentWorkers');
+    });
 });

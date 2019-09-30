@@ -536,8 +536,7 @@ class JobRepository implements IJobRepository
     {
         $this->setUser($user_id);
 
-        // remember to change this to city_id
-        $user_city_id = $this->getUser()->profile->city;
+        $user_city_id = $this->getUser()->profile->city_id;
 
         return JobBoard::with(['city', 'category'])
             ->where('city_id', $user_city_id)

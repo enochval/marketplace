@@ -276,7 +276,7 @@ class UserRepository implements IUserRepository
             'date_of_birth' => $params['date_of_birth'],
             'avatar' => $params['avatar'],
             'address' => $params['address'],
-            'city' => $params['city_id'],
+            'city_id' => $params['city_id'],
             'state' => $params['state'],
             'job_interest' => json_encode($params['job_interest']),
             'bio' => $params['bio']
@@ -581,8 +581,6 @@ class UserRepository implements IUserRepository
      */
     public function registerWorkerByAgent(int $user_id, array $params)
     {
-        $this->setUser($user_id);
-
         $worker = User::create([
             'email' => $params['email'],
             'phone' => $params['phone'],
@@ -590,6 +588,8 @@ class UserRepository implements IUserRepository
         ]);
 
         $worker_id = $worker->id;
+
+        $this->setUser($worker_id);
 
         $this->assignRole(Role::WORKER);
 
@@ -602,26 +602,28 @@ class UserRepository implements IUserRepository
 
         dispatch(new SendWelcomeEmailJob($this->getUser()));
 
-        $worker->profile->create([
+        $worker->profile()->create([
             'first_name' => $params['first_name'],
             'last_name' => $params['last_name'],
             'gender' => $params['gender'],
             'date_of_birth' => $params['date_of_birth'],
             'avatar' => $params['avatar'],
             'address' => $params['address'],
-            'city' => $params['city'],
+            'city_id' => $params['city_id'],
             'state' => $params['state'],
             'job_interest' => json_encode($params['job_interest']),
             'bio' => $params['bio'],
             'bank_verification_number' => $params['bvn'],
         ]);
 
-        $worker->workHistory->create([
+        $worker->workHistory()->create([
             'employer' => $params['employer'],
             'position' => $params['position'],
             'start_date' => $params['start_date'],
             'end_date' => $params['end_date'],
         ]);
+
+        $this->setUser($user_id);
 
         $this->getUser()->agentCustomer()->create([
             'worker_id' => $worker_id

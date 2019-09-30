@@ -29,6 +29,6 @@ class Profile extends BaseModel
 
     public function city()
     {
-        return $this->hasOne(City::class, 'id', 'city');
+        return $this->hasOne(City::class, 'id', 'city_id');
     }
 }
