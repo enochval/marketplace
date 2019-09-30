@@ -601,7 +601,6 @@ class UserController extends Controller
      *         name="per_page",
      *         in="query",
      *         description="Number per page",
-     *         required=true,
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
@@ -611,7 +610,6 @@ class UserController extends Controller
      *         name="order_by",
      *         in="query",
      *         description="Order by a column",
-     *         required=true,
      *         @OA\Schema(
      *             type="string",
      *         )
@@ -620,7 +618,6 @@ class UserController extends Controller
      *         name="sort",
      *         in="query",
      *         description="desc or asc",
-     *         required=true,
      *         @OA\Schema(
      *             type="string",
      *         )

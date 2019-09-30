@@ -77,22 +77,14 @@ class JobBoardController extends Controller
      *                  type="string",
      *              ),
      *              @OA\Property(
-     *                  property="amount",
-     *                  description="Amount",
+     *                  property="budget",
+     *                  description="Budget",
      *                  type="string",
      *              ),
      *              @OA\Property(
      *                  property="no_of_resource",
      *                  description="Number of workers needed",
      *                  type="string",
-     *              ),
-     *              @OA\Property(
-     *                  property="supporting_images",
-     *                  description="Supporting Images",
-     *                  type="array",
-     *                  @OA\Items(
-     *                      type="string"
-     *                  )
      *              ),
      *              @OA\Property(
      *                  property="address",
@@ -107,6 +99,16 @@ class JobBoardController extends Controller
      *              @OA\Property(
      *                  property="state",
      *                  description="State",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="category_id",
+     *                  description="Category ID",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="gender",
+     *                  description="Gender",
      *                  type="string",
      *              ),
      *           )
@@ -185,22 +187,14 @@ class JobBoardController extends Controller
      *                  type="string",
      *              ),
      *              @OA\Property(
-     *                  property="amount",
-     *                  description="Amount",
+     *                  property="budget",
+     *                  description="Budget",
      *                  type="string",
      *              ),
      *              @OA\Property(
      *                  property="no_of_resource",
      *                  description="Number of workers needed",
      *                  type="string",
-     *              ),
-     *              @OA\Property(
-     *                  property="supporting_images",
-     *                  description="Supporting Images",
-     *                  type="array",
-     *                  @OA\Items(
-     *                      type="string"
-     *                  )
      *              ),
      *              @OA\Property(
      *                  property="address",
@@ -215,6 +209,16 @@ class JobBoardController extends Controller
      *              @OA\Property(
      *                  property="state",
      *                  description="State",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="category_id",
+     *                  description="Category ID",
+     *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="gender",
+     *                  description="Gender",
      *                  type="string",
      *              ),
      *           )
@@ -643,7 +647,6 @@ class JobBoardController extends Controller
      *         name="per_page",
      *         in="query",
      *         description="Number per page",
-     *         required=true,
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
@@ -653,7 +656,6 @@ class JobBoardController extends Controller
      *         name="order_by",
      *         in="query",
      *         description="Order by a column",
-     *         required=true,
      *         @OA\Schema(
      *             type="string",
      *         )
@@ -662,7 +664,6 @@ class JobBoardController extends Controller
      *         name="sort",
      *         in="query",
      *         description="desc or asc",
-     *         required=true,
      *         @OA\Schema(
      *             type="string",
      *         )
@@ -705,7 +706,6 @@ class JobBoardController extends Controller
      *         name="per_page",
      *         in="query",
      *         description="Number per page",
-     *         required=true,
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
@@ -715,7 +715,6 @@ class JobBoardController extends Controller
      *         name="order_by",
      *         in="query",
      *         description="Order by a column",
-     *         required=true,
      *         @OA\Schema(
      *             type="string",
      *         )
@@ -724,7 +723,6 @@ class JobBoardController extends Controller
      *         name="sort",
      *         in="query",
      *         description="desc or asc",
-     *         required=true,
      *         @OA\Schema(
      *             type="string",
      *         )
@@ -843,7 +841,6 @@ class JobBoardController extends Controller
      *         name="per_page",
      *         in="query",
      *         description="Number per page",
-     *         required=true,
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
@@ -853,7 +850,6 @@ class JobBoardController extends Controller
      *         name="order_by",
      *         in="query",
      *         description="Order by a column",
-     *         required=true,
      *         @OA\Schema(
      *             type="string",
      *         )
@@ -862,7 +858,6 @@ class JobBoardController extends Controller
      *         name="sort",
      *         in="query",
      *         description="desc or asc",
-     *         required=true,
      *         @OA\Schema(
      *             type="string",
      *         )
@@ -931,7 +926,6 @@ class JobBoardController extends Controller
      *         name="per_page",
      *         in="query",
      *         description="Number per page",
-     *         required=true,
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
@@ -971,7 +965,6 @@ class JobBoardController extends Controller
      *         name="per_page",
      *         in="query",
      *         description="Number per page",
-     *         required=true,
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
@@ -981,7 +974,6 @@ class JobBoardController extends Controller
      *         name="order_by",
      *         in="query",
      *         description="Order by a column",
-     *         required=true,
      *         @OA\Schema(
      *             type="string",
      *         )
@@ -990,7 +982,6 @@ class JobBoardController extends Controller
      *         name="sort",
      *         in="query",
      *         description="desc or asc",
-     *         required=true,
      *         @OA\Schema(
      *             type="string",
      *         )
