@@ -87,7 +87,7 @@ class UserController extends Controller
      *                  type="string",
      *              ),
      *              @OA\Property(
-     *                  property="city",
+     *                  property="city_id",
      *                  description="City",
      *                  type="string",
      *              ),
@@ -100,6 +100,14 @@ class UserController extends Controller
      *                  property="bio",
      *                  description="Brief description about yourself",
      *                  type="string",
+     *              ),
+     *              @OA\Property(
+     *                  property="job_interest",
+     *                  description="Comma separated Job Interest id",
+     *                  type="array",
+     *                  @OA\Items(
+     *                      type="string"
+     *                  )
      *              ),
      *           )
      *       )
