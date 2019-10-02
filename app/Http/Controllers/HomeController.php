@@ -15,8 +15,9 @@ class HomeController extends Controller
 
     public function __construct(IAdminRepository $adminRepository)
     {
-        $this->middleware('auth:api');
-
+        $this->middleware('auth:api', ['except' => [
+            'getCities', 'getCategories'
+        ]]);
 
         $this->adminRepository = $adminRepository;
     }
@@ -26,7 +27,6 @@ class HomeController extends Controller
      *     path="/utils/cities",
      *     operationId="cities",
      *     tags={"Common"},
-     *     security={{"authorization_token": {}}},
      *     summary="Get available cities",
      *     description="",
      *     @OA\Response(
@@ -51,7 +51,6 @@ class HomeController extends Controller
      *     path="/utils/categories",
      *     operationId="categories",
      *     tags={"Common"},
-     *     security={{"authorization_token": {}}},
      *     summary="Get available categories",
      *     description="",
      *     @OA\Response(
