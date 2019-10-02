@@ -19,7 +19,9 @@ class JobBoardController extends Controller
 
     public function __construct(IJobRepository $jobRepository)
     {
-        $this->middleware('auth:api');
+        $this->middleware('auth:api', ['except', [
+            'jobListing'
+        ]]);
 
         $this->middleware('role:super_admin|employer', ['only' => [
             'createJob', 'updateJob', 'getJobPitches', 'hireWorker',
@@ -640,9 +642,8 @@ class JobBoardController extends Controller
      *     path="/job-listing",
      *     operationId="jobListing",
      *     tags={"Job Board Operations"},
-     *     security={{"authorization_token": {}}},
      *     summary="Get all job listing",
-     *     description="Can only be performed by a worker",
+     *     description="Can be performed by anyone",
      *     @OA\Parameter(
      *         name="per_page",
      *         in="query",
