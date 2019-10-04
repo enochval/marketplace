@@ -314,7 +314,7 @@ class UserRepository implements IUserRepository
         try {
             $bvn_verify = (new Paystack())->bvnVerification($this->getUserBVN());
         } catch (Exception $e) {
-            throw new Exception("Unable to connect to third party! Please try again.");
+            throw new Exception("The BVN provided is not correct.");
         }
 
         $bvn_data = data_get($bvn_verify, 'data');
@@ -325,10 +325,10 @@ class UserRepository implements IUserRepository
             // Update bvn_verified status
             $this->updateBvnVerificationStatus();
 
-            return ["bvn_verification_status" => "Valid"];
+            return ["bvn_verification_status" => true];
         }
 
-        return ["bvn_verification_status" => "Invalid"];
+        return ["bvn_verification_status" => false];
     }
 
     /**
