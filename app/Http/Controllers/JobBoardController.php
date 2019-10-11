@@ -19,7 +19,7 @@ class JobBoardController extends Controller
 
     public function __construct(IJobRepository $jobRepository)
     {
-        $this->middleware('auth:api');
+        $this->middleware('auth:api', ['except' => 'topJobs']);
 
         $this->middleware('role:super_admin|employer', ['only' => [
             'createJob', 'updateJob', 'getJobPitches', 'hireWorker',
