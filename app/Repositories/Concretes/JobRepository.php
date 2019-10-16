@@ -403,13 +403,14 @@ class JobRepository implements IJobRepository
 
         if ($this->getUser()->hasRole(Role::EMPLOYER)) {
 
-            return JobBoard::where('employer_id', $user_id)
+            return JobBoard::with(['city', 'category'])
+                ->where('employer_id', $user_id)
                 ->orderBy($orderBy, $sort)
                 ->paginate($perPage);
 
         } elseif ($this->getUser()->hasRole(Role::WORKER)) {
 
-            return JobPitch::with('job')
+            return JobPitch::with('job.city')
                 ->where('worker_id', $user_id)
                 ->orderBy($orderBy, $sort)
                 ->paginate($perPage);
