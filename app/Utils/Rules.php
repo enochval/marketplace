@@ -91,15 +91,16 @@ class Rules
             'gender' => 'required|string',
             'date_of_birth' => 'required|string',
             'address' => 'required|string',
-            'city' => 'required|string',
+            'city_id' => 'required|string',
             'state' => 'required|string',
             'bio' => 'required|string',
             'job_interest' => 'required|array',
             'bvn' => 'required|digits:11',
-            'employer' => 'required|string',
-            'position' => 'required|string',
-            'start_date' => 'required|string',
-            'end_date' => 'required|string',
+            'job_history' => 'required|array',
+            'job_history.*.employer' => 'required|string',
+            'job_history.*.position' => 'required|string',
+            'job_history.*.start_date' => 'required|string',
+            'job_history.*.end_date' => 'required|string'
         ]
     ];
 

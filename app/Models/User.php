@@ -59,7 +59,7 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
 
     public function profile()
     {
-        return $this->hasOne(Profile::class);
+        return $this->hasOne(Profile::class)->with('city');
     }
 
     public function verificationToken()

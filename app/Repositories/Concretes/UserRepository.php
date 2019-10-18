@@ -297,7 +297,7 @@ class UserRepository implements IUserRepository
      * @return mixed
      * @throws Exception
      */
-    public function bvnVerification(int $user_id, int $bvn = null): array
+    public function bvnVerification(int $user_id, int $bvn = null): bool
     {
         $this->setUser($user_id);
 
@@ -314,7 +314,7 @@ class UserRepository implements IUserRepository
         try {
             $bvn_verify = (new Paystack())->bvnVerification($this->getUserBVN());
         } catch (Exception $e) {
-            throw new Exception("The BVN provided is not correct.");
+            throw new Exception("Confirm that your BVN is correct and try again.");
         }
 
         $bvn_data = data_get($bvn_verify, 'data');
@@ -325,10 +325,10 @@ class UserRepository implements IUserRepository
             // Update bvn_verified status
             $this->updateBvnVerificationStatus();
 
-            return ["bvn_verification_status" => true];
+            return true;
         }
 
-        return ["bvn_verification_status" => false];
+        return false;
     }
 
     /**
@@ -616,12 +616,9 @@ class UserRepository implements IUserRepository
             'bank_verification_number' => $params['bvn'],
         ]);
 
-        $worker->workHistory()->create([
-            'employer' => $params['employer'],
-            'position' => $params['position'],
-            'start_date' => $params['start_date'],
-            'end_date' => $params['end_date'],
-        ]);
+        foreach ($params['job_history'] as $job_history) {
+            $worker->workHistory()->create($job_history);
+        }
 
         $this->setUser($user_id);
 

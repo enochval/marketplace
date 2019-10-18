@@ -32,6 +32,7 @@ $app = new Laravel\Lumen\Application(
  $app->configure('entrust');
  $app->configure('swagger-lume');
  $app->configure('database');
+ $app->configure('config');
 
  $app->configure('mail');
  $app->alias('mailer', Illuminate\Mail\Mailer::class);
