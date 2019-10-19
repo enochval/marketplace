@@ -669,6 +669,22 @@ class JobBoardController extends Controller
      *             type="string",
      *         )
      *     ),
+     *     @OA\Parameter(
+     *         name="query",
+     *         in="query",
+     *         description="For Job Titles or Description",
+     *         @OA\Schema(
+     *             type="string",
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         name="city_id",
+     *         in="query",
+     *         description="For Job Location",
+     *         @OA\Schema(
+     *             type="string",
+     *         )
+     *     ),
      *     @OA\Response(
      *         response="200",
      *         description="Returns response object",
@@ -685,8 +701,10 @@ class JobBoardController extends Controller
             $orderBy = request()->has('order_by') ? $payload['order_by'] : 'created_at';
             $sort = request()->has('sort') ? $payload['sort'] : 'desc';
 
+            $title = request()->get('query') ?? false;
+            $location = request()->get('city_id') ?? false;
 
-            $jobs = $this->jobRepository->jobListing($perPage, $orderBy, $sort);
+            $jobs = $this->jobRepository->jobListing($perPage, $orderBy, $sort, $title, $location);
 
             return $this->withData($jobs);
 

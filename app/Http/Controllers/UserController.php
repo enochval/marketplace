@@ -460,26 +460,33 @@ class UserController extends Controller
      *                  description="Bank Verification Number",
      *                  type="string",
      *              ),
-     *              @OA\Property(
-     *                  property="employer",
-     *                  description="Employer",
-     *                  type="string",
-     *              ),
-     *              @OA\Property(
-     *                  property="position",
-     *                  description="Position",
-     *                  type="string",
-     *              ),
-     *              @OA\Property(
-     *                  property="start_date",
-     *                  description="Start Date",
-     *                  type="string",
-     *              ),
-     *              @OA\Property(
-     *                  property="end_date",
-     *                  description="End Date",
-     *                  type="string",
-     *              ),
+     *             @OA\Property(
+     *                  property="job_history",
+     *                  description="Job history of the worker",
+     *                  type="array",
+     *                  @OA\Items(
+     *                      @OA\Property(
+     *                          property="employer",
+     *                          description="Employer",
+     *                          type="string",
+     *                     ),
+     *                      @OA\Property(
+     *                          property="position",
+     *                          description="Position",
+     *                          type="string",
+     *                     ),
+     *                      @OA\Property(
+     *                          property="start_date",
+     *                          description="Start Date",
+     *                          type="string",
+     *                     ),
+     *                      @OA\Property(
+     *                          property="end_date",
+     *                          description="End Date",
+     *                          type="string",
+     *                     ),
+     *                  )
+     *             )
      *           )
      *       )
      *     ),

@@ -494,13 +494,39 @@ class JobRepository implements IJobRepository
         return true;
     }
 
-    public function jobListing($perPage = 15, $orderBy = 'created_at', $sort = 'desc')
+    public function jobListing($perPage, $orderBy, $sort, $by_title = false, $by_location = false)
     {
-        return JobBoard::with(['city', 'category'])
+        $job_listing = JobBoard::with(['city', 'category'])
             ->where('is_submitted', true)
             ->where('is_approved', true)
             ->where('is_running', false)
-            ->where('is_completed', false)
+            ->where('is_completed', false);
+
+        if ($by_title && !$by_location) {
+            $job_listing
+                ->where('title', 'like', '%'.$by_title.'%')
+                ->orWhere('description', 'like', '%'.$by_title.'%');
+        }
+
+        if ($by_location && !$by_title) {
+            $job_listing
+                ->where('city_id', $by_location);
+        }
+
+        if ($by_title && $by_location) {
+            $job_listing
+                ->where('city_id', $by_location)
+                ->where('title', 'like', '%'.$by_title.'%')
+                ->orWhere('description', 'like', '%'.$by_title.'%');
+        }
+
+        if ($by_title || $by_location) {
+            if (!$job_listing->count()) {
+                return [];
+            }
+        }
+
+        return $job_listing
             ->orderBy($orderBy, $sort)
             ->paginate($perPage);
     }

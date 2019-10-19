@@ -16,7 +16,7 @@ interface IJobRepository
 
     public function hireResource($job_id, $worker_id);
 
-    public function jobListing($perPage, $orderBy, $sort);
+    public function jobListing($perPage, $orderBy, $sort, $by_title, $by_location);
 
     public function allJobs($perPage, $orderBy, $sort);
 
