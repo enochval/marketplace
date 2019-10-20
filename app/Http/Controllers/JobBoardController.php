@@ -642,7 +642,7 @@ class JobBoardController extends Controller
      *     path="/job-listing",
      *     operationId="jobListing",
      *     tags={"Job Board Operations"},
-     *     summary="Get all job listing",
+     *     summary="Get all job listing and to search for Jobs based on spec criteria(s)",
      *     description="Can be performed by anyone",
      *     @OA\Parameter(
      *         name="per_page",

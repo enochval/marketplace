@@ -43,10 +43,11 @@ class Rules
         ],
 
         'WORK_HISTORY' => [
-            'employer' => 'required|string',
-            'position' => 'required|string',
-            'start_date' => 'required|string',
-            'end_date' => 'required|string',
+            'job_history' => 'required|array',
+            'job_history.*.employer' => 'required|string',
+            'job_history.*.position' => 'required|string',
+            'job_history.*.start_date' => 'required|string',
+            'job_history.*.end_date' => 'nullable'
         ],
 
         'BVN_VERIFICATION' => [
@@ -100,7 +101,7 @@ class Rules
             'job_history.*.employer' => 'required|string',
             'job_history.*.position' => 'required|string',
             'job_history.*.start_date' => 'required|string',
-            'job_history.*.end_date' => 'required|string'
+            'job_history.*.end_date' => 'nullable'
         ]
     ];
 

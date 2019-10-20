@@ -641,7 +641,7 @@ class JobRepository implements IJobRepository
     {
         return [
             'no_of_completed_jobs' => $this->getUserNoOfCompletedJobs($user_id),
-            'amount_earned' => $this->getTotalAmountEarned($user_id),
+            'amount_earned' => number_format($this->getTotalAmountEarned($user_id)),
             'active_jobs' => $this->getUserRunningJobs($user_id)
         ];
     }

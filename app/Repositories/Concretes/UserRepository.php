@@ -167,12 +167,14 @@ class UserRepository implements IUserRepository
     {
         $this->setUser($user_id);
 
-        $this->getUser()->workHistory()->create([
-            'employer' => $params['employer'],
-            'position' => $params['position'],
-            'start_date' => $params['start_date'],
-            'end_date' => $params['end_date'],
-        ]);
+        foreach ($params['job_history'] as $job_history) {
+
+            if (!array_key_exists('end_date', $job_history)) {
+                $job_history['end_date'] = '';
+            }
+
+            $this->getUser()->workHistory()->create($job_history);
+        }
 
         $this->updateWorkHistoryStatus();
 
@@ -617,6 +619,9 @@ class UserRepository implements IUserRepository
         ]);
 
         foreach ($params['job_history'] as $job_history) {
+            if (!array_key_exists('end_date', $job_history)) {
+                $job_history['end_date'] = '';
+            }
             $worker->workHistory()->create($job_history);
         }
 

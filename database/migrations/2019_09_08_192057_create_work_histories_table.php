@@ -19,7 +19,7 @@ class CreateWorkHistoriesTable extends Migration
             $table->string('employer');
             $table->string('position');
             $table->string('start_date');
-            $table->string('end_date');
+            $table->string('end_date')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')

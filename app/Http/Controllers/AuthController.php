@@ -6,10 +6,7 @@ use App\Models\Role;
 use Exception;
 use App\Utils\Rules;
 use Illuminate\Support\Facades\Validator;
-use App\Repositories\Contracts\IWorkerRepository as IWorkerRepositoryAlias;
-use App\Repositories\Contracts\IEmployerRepository;
 use App\Repositories\Contracts\IUserRepository;
-use function GuzzleHttp\Promise\all;
 
 class AuthController extends Controller
 {
