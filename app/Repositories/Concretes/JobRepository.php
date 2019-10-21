@@ -376,7 +376,7 @@ class JobRepository implements IJobRepository
 
     public function getWorkerJobPitch($job_id, $worker_id)
     {
-        return JobPitch::with('worker.profile:user_id,first_name,last_name,avatar,gender,state,bio,city_id', 'job:id,title,description')
+        return JobPitch::with('worker.profile:user_id,first_name,last_name,avatar,gender,state,bio,city_id')
             ->where('job_board_id', $job_id)
             ->where('worker_id', $worker_id)
             ->first();
@@ -385,7 +385,7 @@ class JobRepository implements IJobRepository
     public function getJobPitches($job_id)
     {
         return JobPitch::with(
-            'worker.profile:user_id,first_name,last_name,avatar,gender,state,bio,city_id', 'job:id,title,description'
+            'worker.profile:user_id,first_name,last_name,avatar,gender,state,bio,city_id'
         )->where('job_board_id', $job_id)->get();
     }
 

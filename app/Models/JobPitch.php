@@ -14,6 +14,15 @@ class JobPitch extends BaseModel
         'updated_at'
     ];
 
+    protected $appends = [
+        'job_title'
+    ];
+
+    public function getJobTitleAttribute($value)
+    {
+        return JobBoard::find($this->attributes['job_board_id'])->title;
+    }
+
     public function worker()
     {
         return $this->hasOne(User::class, 'id', 'worker_id')
