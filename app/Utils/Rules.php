@@ -53,7 +53,7 @@ class Rules
             'employer' => 'required|string',
             'position' => 'required|string',
             'start_date' => 'required|string',
-            'end_date' => 'string',
+            'end_date' => 'nullable',
         ],
 
         'BVN_VERIFICATION' => [
