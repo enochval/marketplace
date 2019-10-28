@@ -33,4 +33,13 @@ class JobPitch extends BaseModel
     {
         return $this->hasOne(JobBoard::class, 'id','job_board_id');
     }
+
+    public function getIsHiredAttribute($is_hired)
+    {
+        if ($is_hired) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
