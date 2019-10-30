@@ -4,6 +4,7 @@
 namespace App\Repositories\Concretes;
 
 use App\Jobs\SendHireNotification;
+use App\Models\AgentCustomer;
 use App\Models\GeneralSetting;
 use App\Models\JobPitch;
 use App\Models\JobReview;
@@ -14,6 +15,7 @@ use App\Models\JobBoard;
 use App\Repositories\Contracts\IJobRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use function Composer\Autoload\includeFile;
 
 class JobRepository implements IJobRepository
 {
@@ -124,6 +126,7 @@ class JobRepository implements IJobRepository
         $job_post = $this->retrieveEmployerJobPost($user_id, $job_id);
 
         $job_post->update([
+            'is_running' => false,
             'is_completed' => true
         ]);
 
@@ -504,8 +507,8 @@ class JobRepository implements IJobRepository
 
         if ($by_title && !$by_location) {
             $job_listing
-                ->where('title', 'like', '%'.$by_title.'%')
-                ->orWhere('description', 'like', '%'.$by_title.'%');
+                ->where('title', 'like', '%' . $by_title . '%')
+                ->orWhere('description', 'like', '%' . $by_title . '%');
         }
 
         if ($by_location && !$by_title) {
@@ -516,8 +519,8 @@ class JobRepository implements IJobRepository
         if ($by_title && $by_location) {
             $job_listing
                 ->where('city_id', $by_location)
-                ->where('title', 'like', '%'.$by_title.'%')
-                ->orWhere('description', 'like', '%'.$by_title.'%');
+                ->where('title', 'like', '%' . $by_title . '%')
+                ->orWhere('description', 'like', '%' . $by_title . '%');
         }
 
         if ($by_title || $by_location) {
@@ -591,10 +594,19 @@ class JobRepository implements IJobRepository
         return JobPitch::where('worker_id', $user_id)
             ->where('is_hired', true)
             ->whereHas('job', function (Builder $query) {
-                $query->where('is_completed', true);
+                $query->where('is_completed', true)
+                    ->where('is_running', false);
             })
             ->count();
 
+    }
+
+    public function getEmployerNoOfCompletedJobs($user_id)
+    {
+        return JobBoard::where('employer_id', $user_id)
+            ->where('is_completed', true)
+            ->where('is_running', false)
+            ->count();
     }
 
     public function getAverageUserRating($user_id)
@@ -618,6 +630,14 @@ class JobRepository implements IJobRepository
             ->count();
     }
 
+    public function getEmployerRunningJobs($user_id)
+    {
+        return JobBoard::where('employer_id', $user_id)
+            ->where('is_completed', false)
+            ->where('is_running', true)
+            ->count();
+    }
+
     public function getTotalAmountEarned($user_id)
     {
         $jobs = JobPitch::where('worker_id', $user_id)
@@ -633,17 +653,184 @@ class JobRepository implements IJobRepository
             $total_amount += $job->amount;
         }
 
-        return $total_amount;
+        return number_format($total_amount);
+    }
+
+    public function getTotalAmountSpent($user_id)
+    {
+        $jobs = JobBoard::where('employer_id', $user_id)
+            ->where('is_completed', true)
+            ->whereHas('pitch', function (Builder $query) {
+                $query->where('is_hired', true);
+            })
+            ->get();
+
+        $total_amount = 0;
+
+        foreach ($jobs as $job) {
+            foreach ($job->pitch as $pitch) {
+                $total_amount += $pitch->amount;
+            }
+        }
+
+        return number_format($total_amount);
+    }
+
+    public function getNoOfAgentRegisteredWorkers($user_id)
+    {
+        return AgentCustomer::where('user_id', $user_id)->count();
+    }
+
+    public function employerMonthlyExpenses($user_id)
+    {
+        $jobs = JobBoard::where('employer_id', $user_id)
+            ->where('is_completed', true)
+            ->whereHas('pitch', function (Builder $query) {
+                $query->where('is_hired', true);
+            })
+            ->get();
+
+        $monthly_expenses = [
+            'Jan' => 0,
+            'Feb' => 0,
+            'Mar' => 0,
+            'Apr' => 0,
+            'May' => 0,
+            'Jun' => 0,
+            'Jul' => 0,
+            'Aug' => 0,
+            'Sept' => 0,
+            'Oct' => 0,
+            'Nov' => 0,
+            'Dec' => 0,
+        ];
+
+        foreach ($jobs as $job) {
+            foreach ($job->pitch as $pitch) {
+                $month = $pitch->updated_at->month;
+                if ($month == 1) {
+                    $monthly_expenses['Jan'] += $pitch->amount;
+                }if ($month == 2) {
+                    $monthly_expenses['Feb'] += $pitch->amount;
+                }if ($month == 3) {
+                    $monthly_expenses['Mar'] += $pitch->amount;
+                }if ($month == 4) {
+                    $monthly_expenses['Apr'] += $pitch->amount;
+                }if ($month == 5) {
+                    $monthly_expenses['May'] += $pitch->amount;
+                }if ($month == 6) {
+                    $monthly_expenses['Jun'] += $pitch->amount;
+                }if ($month == 7) {
+                    $monthly_expenses['Jul'] += $pitch->amount;
+                }if ($month == 8) {
+                    $monthly_expenses['Aug'] += $pitch->amount;
+                }if ($month == 9) {
+                    $monthly_expenses['Sept'] += $pitch->amount;
+                }if ($month == 10) {
+                    $monthly_expenses['Oct'] += $pitch->amount;
+                }if ($month == 11) {
+                    $monthly_expenses['Nov'] += $pitch->amount;
+                }if ($month == 12) {
+                    $monthly_expenses['Dec'] += $pitch->amount;
+                }
+            }
+        }
+
+        return $monthly_expenses;
+    }
+
+    public function getWorkerMonthlyEarnings($user_id)
+    {
+        $jobs = JobPitch::where('worker_id', $user_id)
+            ->where('is_hired', true)
+            ->whereHas('job', function (Builder $query) {
+                $query->where('is_completed', true);
+            })
+            ->get();
+
+        $monthly_expenses = [
+            'Jan' => 0,
+            'Feb' => 0,
+            'Mar' => 0,
+            'Apr' => 0,
+            'May' => 0,
+            'Jun' => 0,
+            'Jul' => 0,
+            'Aug' => 0,
+            'Sept' => 0,
+            'Oct' => 0,
+            'Nov' => 0,
+            'Dec' => 0,
+        ];
+
+        foreach ($jobs as $pitch) {
+            $month = $pitch->updated_at->month;
+
+            if ($month == 1) {
+                $monthly_expenses['Jan'] += $pitch->amount;
+            }
+            if ($month == 2) {
+                $monthly_expenses['Feb'] += $pitch->amount;
+            }
+            if ($month == 3) {
+                $monthly_expenses['Mar'] += $pitch->amount;
+            }
+            if ($month == 4) {
+                $monthly_expenses['Apr'] += $pitch->amount;
+            }
+            if ($month == 5) {
+                $monthly_expenses['May'] += $pitch->amount;
+            }
+            if ($month == 6) {
+                $monthly_expenses['Jun'] += $pitch->amount;
+            }
+            if ($month == 7) {
+                $monthly_expenses['Jul'] += $pitch->amount;
+            }
+            if ($month == 8) {
+                $monthly_expenses['Aug'] += $pitch->amount;
+            }
+            if ($month == 9) {
+                $monthly_expenses['Sept'] += $pitch->amount;
+            }
+            if ($month == 10) {
+                $monthly_expenses['Oct'] += $pitch->amount;
+            }
+            if ($month == 11) {
+                $monthly_expenses['Nov'] += $pitch->amount;
+            }
+            if ($month == 12) {
+                $monthly_expenses['Dec'] += $pitch->amount;
+            }
+        }
+
+        return $monthly_expenses;
     }
 
 
     public function dashboardStat($user_id)
     {
-        return [
-            'no_of_completed_jobs' => $this->getUserNoOfCompletedJobs($user_id),
-            'amount_earned' => number_format($this->getTotalAmountEarned($user_id)),
-            'active_jobs' => $this->getUserRunningJobs($user_id)
-        ];
+        $this->setUser($user_id);
+
+        if ($this->getUser()->hasRole(Role::WORKER)) {
+            return [
+                'no_of_completed_jobs' => $this->getUserNoOfCompletedJobs($user_id),
+                'amount_earned' => $this->getTotalAmountEarned($user_id),
+                'active_jobs' => $this->getUserRunningJobs($user_id),
+                'monthly_earnings' => $this->getWorkerMonthlyEarnings($user_id)
+            ];
+        } elseif ($this->getUser()->hasRole(Role::EMPLOYER)) {
+            return [
+                'no_of_completed_jobs' => $this->getEmployerNoOfCompletedJobs($user_id),
+                'amount_spent' => $this->getTotalAmountSpent($user_id),
+                'active_jobs' => $this->getEmployerRunningJobs($user_id),
+                'monthly_expenses' => $this->employerMonthlyExpenses($user_id)
+            ];
+        } elseif ($this->getUser()->hasRole(Role::AGENT)) {
+            return [
+                'no_of_registered_workers' => $this->getNoOfAgentRegisteredWorkers($user_id)
+            ];
+        }
     }
 }
 

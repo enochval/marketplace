@@ -33,4 +33,9 @@ class JobBoard extends BaseModel
             'id', 'name'
         ]);
     }
+
+    public function pitch()
+    {
+        return $this->hasMany(JobPitch::class, 'job_board_id', 'id');
+    }
 }
