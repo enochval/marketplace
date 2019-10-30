@@ -385,12 +385,11 @@ class JobRepository implements IJobRepository
     public function getJobPitches($job_id)
     {
         $jobBoard = JobBoard::where('id', $job_id)->first();
-        $jobTitle = $jobBoard->title;
         $jobPitch = JobPitch::with(
             'worker.profile:user_id,first_name,last_name,avatar,gender,state,bio,city_id'
         )->where('job_board_id', $job_id)->get();
 
-        return [$jobTitle, $jobPitch];
+        return [$jobBoard, $jobPitch];
     }
 
     /**

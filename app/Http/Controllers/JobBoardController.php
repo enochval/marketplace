@@ -355,7 +355,7 @@ class JobBoardController extends Controller
             $pitches = $this->jobRepository->getJobPitches($job_id);
             return response()->json([
                 'status' => true,
-                'job_title' => $pitches[0],
+                'job' => $pitches[0],
                 'data' => $pitches[1]
             ], 200);
 
