@@ -165,16 +165,15 @@ class UserRepository implements IUserRepository
 
     public function workHistory(int $user_id, array $params): User
     {
+    
         $this->setUser($user_id);
 
-        foreach ($params['job_history'] as $job_history) {
-
-            if (!array_key_exists('end_date', $job_history)) {
-                $job_history['end_date'] = '';
-            }
-
-            $this->getUser()->workHistory()->create($job_history);
-        }
+        $this->getUser()->workHistory()->create([
+            'employer' => $params['employer'],
+            'position' => $params['position'],
+            'start_date' => $params['start_date'],
+            'end_date' => $params['end_date'],
+        ]);
 
         $this->updateWorkHistoryStatus();
 

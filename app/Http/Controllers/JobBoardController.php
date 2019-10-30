@@ -353,8 +353,12 @@ class JobBoardController extends Controller
     {
         try {
             $pitches = $this->jobRepository->getJobPitches($job_id);
+            return response()->json([
+                'status' => true,
+                'job' => $pitches[0],
+                'data' => $pitches[1]
+            ], 200);
 
-            return $this->withData($pitches);
         } catch(Exception $e) {
             return $this->error($e->getMessage());
         }

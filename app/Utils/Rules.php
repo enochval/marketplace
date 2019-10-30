@@ -42,12 +42,18 @@ class Rules
             'new_password' => 'required|confirmed|min:8',
         ],
 
+        // 'WORK_HISTORY' => [
+        //     'job_history' => 'required|array',
+        //     'job_history.*.employer' => 'required|string',
+        //     'job_history.*.position' => 'required|string',
+        //     'job_history.*.start_date' => 'required|string',
+        //     'job_history.*.end_date' => 'nullable'
+        // ],
         'WORK_HISTORY' => [
-            'job_history' => 'required|array',
-            'job_history.*.employer' => 'required|string',
-            'job_history.*.position' => 'required|string',
-            'job_history.*.start_date' => 'required|string',
-            'job_history.*.end_date' => 'nullable'
+            'employer' => 'required|string',
+            'position' => 'required|string',
+            'start_date' => 'required|string',
+            'end_date' => 'nullable',
         ],
 
         'BVN_VERIFICATION' => [
